@@ -1,26 +1,46 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Nuevo Comunicado</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content class="ion-padding">
-  <ion-list>
-    <ion-item>
-      <ion-input label="Título" labelPlacement="floating" [(ngModel)]="comunicado.titulo" type="text" required></ion-input>
-    </ion-item>
-    <ion-item>
-      <!-- Se usa ion-textarea para mensajes más largos -->
-      <ion-textarea label="Mensaje" labelPlacement="floating" [(ngModel)]="comunicado.mensaje" [autoGrow]="true" required></ion-textarea>
-    </ion-item>
-  </ion-list>
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/tabs/tab1" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="header-title">
+        <h1>Nuevo Comunicado</h1>
+      </div>
+    </div>
+  </div>
 
-  <ion-button expand="block" (click)="saveComunicado()" [disabled]="guardando" class="ion-margin-top">
-    <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-    <span *ngIf="!guardando">Publicar Comunicado</span>
-  </ion-button>
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="form-wrapper">
+
+      <div class="input-group">
+        <label>Título</label>
+        <ion-item class="custom-input" lines="none">
+          <ion-input placeholder="Ej: Suspensión de clases" [(ngModel)]="comunicado.titulo" type="text"
+            required></ion-input>
+        </ion-item>
+      </div>
+
+      <div class="input-group">
+        <label>Mensaje</label>
+        <ion-item class="custom-input textarea-input" lines="none">
+          <ion-textarea placeholder="Escribe aquí el contenido del comunicado..." [(ngModel)]="comunicado.mensaje"
+            [autoGrow]="true" rows="6" required>
+          </ion-textarea>
+        </ion-item>
+      </div>
+
+      <div class="action-container">
+        <ion-button expand="block" class="publish-btn" (click)="saveComunicado()" [disabled]="guardando">
+          <span *ngIf="!guardando">PUBLICAR COMUNICADO</span>
+          <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+        </ion-button>
+      </div>
+
+    </div>
+  </div>
+
 </ion-content>
-    

@@ -1,83 +1,43 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab2"></ion-back-button>
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
     </ion-buttons>
-    <ion-title>Historial de Asistencia</ion-title>
+    <ion-title>Historial de Asistencias</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-
-  <ion-spinner *ngIf="cargando" name="crescent" class="spinner-center"></ion-spinner>
-
-  <div *ngIf="!cargando && curso">
-
-    <!-- SECCIÓN PARA EL PROFESOR: Historial de Asistencia de toda la clase -->
-    <div *ngIf="esProfesorDelCurso">
-      <ion-list-header>
-        <ion-label>Historial de la Clase: {{ curso.nombre }}</ion-label>
-      </ion-list-header>
-      <ion-list [inset]="true" *ngIf="historialAsistencias.length > 0; else noHayRegistros">
-        <ion-item *ngFor="let asistencia of historialAsistencias">
-          <ion-label>
-            <h3>{{ asistencia.nombreEstudiante }}</h3>
-            <p>{{ asistencia.fecha | date:'fullDate':'':'es' }}</p>
-          </ion-label>
-          <ion-badge [color]="asistencia.estado === 'PRESENTE' ? 'success' : (asistencia.estado === 'FALTA' ? 'danger' : 'warning')" slot="end">
-            {{ asistencia.estado }}
-          </ion-badge>
-        </ion-item>
-      </ion-list>
-    </div>
-
-    <!-- SECCIÓN PARA EL ESTUDIANTE: Su historial personal -->
-    <div *ngIf="esEstudianteDelCurso">
-      <ion-list-header>
-        <ion-label>Mi Historial en: {{ curso.nombre }}</ion-label>
-      </ion-list-header>
-      <ion-list [inset]="true" *ngIf="miHistorialAsistencia.length > 0; else noHayRegistros">
-        <ion-item *ngFor="let asistencia of miHistorialAsistencia">
-          <ion-label>
-            <h3>{{ asistencia.fecha | date:'fullDate':'':'es' }}</h3>
-          </ion-label>
-          <ion-badge [color]="asistencia.estado === 'PRESENTE' ? 'success' : (asistencia.estado === 'FALTA' ? 'danger' : 'warning')" slot="end">
-            {{ asistencia.estado }}
-          </ion-badge>
-        </ion-item>
-      </ion-list>
-    </div>
-
-    <!-- SECCIÓN DE NOTAS (Opcional, se puede quitar si esta página es solo de asistencia) -->
-    <ion-card *ngIf="esEstudianteDelCurso && misNotas">
-      <ion-card-header>
-        <ion-card-title>Mis Notas</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-list>
-          <ion-item>
-            <ion-label>Bimestre 1</ion-label>
-            <ion-note slot="end">{{ misNotas.bimestre1 || 0 }}</ion-note>
-          </ion-item>
-          <ion-item>
-            <ion-label>Bimestre 2</ion-label>
-            <ion-note slot="end">{{ misNotas.bimestre2 || 0 }}</ion-note>
-          </ion-item>
-          <ion-item lines="full">
-            <ion-label><strong>Promedio Final</strong></ion-label>
-            <ion-note slot="end" color="primary"><strong>{{ misNotas.promedioFinal || 0 }}</strong></ion-note>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
-
-    <ng-template #noHayRegistros>
-      <ion-card class="ion-text-center ion-padding">
-        <ion-card-content>
-          No hay registros de asistencia para mostrar.
-        </ion-card-content>
-      </ion-card>
-    </ng-template>
-
+<ion-content>
+  @if (isLoading) {
+  <div class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando asistencias...</p>
   </div>
+  } @else { @for (grupo of gruposDeAsistencias; track grupo.id) {
+  <ion-list-header color="light">
+    {{ grupo.nombreCurso }} ({{ grupo.nombreGrado }})
+  </ion-list-header>
+  <ion-list [inset]="true">
+    @for (asistencia of grupo.asistencias; track asistencia.id) {
+    <ion-item>
+      <ion-label>{{ formatDate(asistencia.fecha) }}</ion-label>
+      <ion-badge
+        [color]="asistencia.estado === 'PRESENTE' ? 'success' : (asistencia.estado === 'AUSENTE' ? 'danger' : 'warning')"
+        slot="end"
+      >
+        {{ asistencia.estado }}
+      </ion-badge>
+    </ion-item>
+    } @empty {
+    <ion-item lines="none">
+      <ion-label>No hay asistencias para este curso.</ion-label>
+    </ion-item>
+    }
+  </ion-list>
+  } @empty { @if (!isLoading) {
+  <div class="ion-text-center ion-padding">
+    <ion-icon name="cloud-offline-outline" size="large"></ion-icon>
+    <p>No tienes asistencias registradas en ninguna clase.</p>
+  </div>
+  } } }
 </ion-content>

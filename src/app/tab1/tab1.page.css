@@ -1,0 +1,235 @@
+/* Dark Theme Dashboard Styles */
+
+ion-content.dashboard-content {
+  --background: #121212;
+  /* Dark Background */
+}
+
+/* Header Background */
+.header-background {
+  background: #3b82f6;
+  /* Solid Blue */
+  padding: 60px 24px 80px 24px;
+  border-bottom-left-radius: 0;
+  /* Flat bottom or slight radius? Image looks flat/simple */
+  border-bottom-right-radius: 0;
+  box-shadow: none;
+  /* Flat design */
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.greeting h1 {
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.greeting h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 4px 0 0 0;
+}
+
+.avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main Container */
+.main-container {
+  padding: 0 16px;
+  margin-top: -60px;
+  /* Overlap */
+}
+
+.section-wrapper {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.section-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5e7eb;
+  /* Light text */
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Calendar Widget */
+.calendar-widget {
+  background: #1e1e1e;
+  /* Dark Card */
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.custom-datetime {
+  border-radius: 12px;
+  --background: #1e1e1e;
+  color: #ffffff;
+  margin: 0 auto;
+}
+
+/* Action Cards */
+.grid-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-card {
+  background: #1e1e1e;
+  /* Dark Card */
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+  /* Subtle border */
+}
+
+.action-card:active {
+  background: #2c2c2c;
+}
+
+.icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  color: white;
+  font-size: 20px;
+}
+
+/* Flat Colors for Icons */
+.gradient-blue {
+  background: #3b82f6;
+}
+
+.gradient-purple {
+  background: #8b5cf6;
+}
+
+.gradient-cyan {
+  background: #06b6d4;
+}
+
+.card-text h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+}
+
+.card-text p {
+  font-size: 13px;
+  color: #9ca3af;
+  /* Grey text */
+  margin: 0;
+}
+
+.arrow-icon {
+  margin-left: auto;
+  color: #6b7280;
+  font-size: 20px;
+}
+
+/* Comunicado Cards */
+.comunicado-card {
+  background: #1e1e1e;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  margin-bottom: 16px;
+  border: 1px solid #333;
+}
+
+.comunicado-left-border {
+  width: 4px;
+  background: #3b82f6;
+  /* Solid Blue accent */
+}
+
+.comunicado-content {
+  padding: 16px;
+  flex: 1;
+}
+
+.comunicado-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.comunicado-top h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.date {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d1d5db;
+  background: #374151;
+  /* Darker grey badge */
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.comunicado-content p {
+  font-size: 14px;
+  color: #d1d5db;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  border-top: 1px solid #374151;
+  padding-top: 8px;
+}
+
+/* FAB */
+.main-fab {
+  --background: #3b82f6;
+  --color: white;
+}
+
+.add-btn {
+  --color: #60a5fa;
+}

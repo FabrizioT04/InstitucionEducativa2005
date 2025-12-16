@@ -9,7 +9,7 @@ import localeEs from '@angular/common/locales/es'; // 1. Importar los datos del 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
+  styleUrls: ['app.component.css'],
   standalone: true,
   // Se mantienen tus imports originales
   imports: [IonApp, IonRouterOutlet],
@@ -20,4 +20,5 @@ export class AppComponent {
     registerLocaleData(localeEs, 'es');
   }
 }
+
 

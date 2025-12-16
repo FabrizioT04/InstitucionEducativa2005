@@ -1,0 +1,276 @@
+/* Dark Theme User List Styles */
+
+ion-content.dashboard-content {
+  --background: #121212;
+  /* Dark Background */
+}
+
+/* Header Background */
+.header-background {
+  background: #3b82f6;
+  /* Solid Blue */
+  padding: 60px 24px 80px 24px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: none;
+  /* Flat design */
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.greeting h1 {
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.greeting h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 4px 0 0 0;
+}
+
+.avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main Container */
+.main-container {
+  padding: 0 16px;
+  margin-top: -60px;
+  /* Overlap */
+}
+
+.section-wrapper {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.section-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5e7eb;
+  /* Light text */
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Search & Filter Styles */
+.search-container {
+  margin-bottom: 16px;
+  background: #1e1e1e;
+  /* Dark Card */
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+}
+
+ion-searchbar {
+  --background: #ffffff;
+  /* Darker input */
+  --color: #ffffff;
+  --placeholder-color: #9ca3af;
+  --icon-color: #9ca3af;
+  --border-radius: 8px;
+  --box-shadow: none;
+  padding: 0;
+}
+
+.filter-container {
+  margin-bottom: 16px;
+  background: #fffefe;
+  /* Dark Card */
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+}
+
+ion-item {
+  --background: #1e1e1e;
+  --color: #ffffff;
+  --border-color: #333;
+}
+
+ion-select {
+  --placeholder-color: #ffffff;
+  color: #ffffff;
+}
+
+/* Action Cards (Adapted for Users) */
+.action-card {
+  background: #ffffff;
+  /* Dark Card */
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.action-card:active {
+  background: #000000;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 16px;
+  border: 2px solid #3b82f6;
+  /* Blue border for avatar */
+  flex-shrink: 0;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-text {
+  flex: 1;
+  min-width: 0;
+  /* Prevent text overflow issues */
+}
+
+.card-text h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-text p {
+  font-size: 13px;
+  color: #9ca3af;
+  /* Grey text */
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Role Chips */
+.role-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.role-administrador {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+/* Darker red bg, light text */
+.role-profesor {
+  background: #1e3a8a;
+  color: #bfdbfe;
+}
+
+/* Darker blue bg, light text */
+.role-estudiante {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+/* Darker green bg, light text */
+
+/* Card Actions */
+.card-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+  width: 100%;
+}
+
+ion-button {
+  --color: #3b82f6;
+}
+
+ion-button[color="danger"] {
+  --color: #ef4444;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.empty-state ion-icon {
+  font-size: 60px;
+  margin-bottom: 16px;
+  color: #4b5563;
+}
+
+.empty-state h2 {
+  font-weight: 600;
+  font-size: 18px;
+  color: #e5e7eb;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* Spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+ion-spinner {
+  --color: #3b82f6;
+}
+
+/* FAB */
+.main-fab {
+  --background: #3b82f6;
+  --color: white;
+  --box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}

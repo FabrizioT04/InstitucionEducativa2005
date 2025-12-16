@@ -1,0 +1,114 @@
+/* Dark Theme Course Detail Styles */
+
+ion-content {
+    --background: #121212;
+    /* Dark Background */
+}
+
+/* Header Background */
+.header-background {
+    background: #3b82f6;
+    /* Solid Blue */
+    padding: 60px 24px 80px 24px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: none;
+    /* Flat design */
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+}
+
+.header-title h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0 16px;
+}
+
+/* Main Container */
+.main-container {
+    padding: 0 16px;
+    margin-top: -60px;
+    /* Overlap */
+}
+
+/* Cards */
+ion-card {
+    --background: #ffffff;
+    --color: #ffffff;
+    box-shadow: 0 4px 6px rgb(255, 255, 255);
+    border: 1px solid #ffffff;
+    border-radius: 12px;
+    margin-inline: 0;
+    margin-bottom: 16px;
+}
+
+ion-card-title {
+    --color: #000000;
+    font-weight: 700;
+}
+
+ion-card-subtitle {
+    --color: #000000;
+}
+
+ion-item {
+    --background: #fffcfc;
+    --color: #000000;
+    --border-color: #333;
+}
+
+ion-list {
+    background: transparent;
+    padding: 0;
+}
+
+ion-list-header {
+    color: #000000;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 4px;
+    margin-bottom: 8px;
+}
+
+ion-label h3 {
+    color: #000000;
+    font-weight: 600;
+}
+
+ion-label p {
+    color: #000000;
+}
+
+ion-note {
+    color: #000000;
+}
+
+/* Icons */
+ion-icon {
+    color: #3b82f6;
+}
+
+ion-icon[color="danger"] {
+    color: #ef4444;
+}
+
+ion-label[color="danger"] {
+    color: #ef4444;
+}
+
+/* Spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+}
+
+ion-spinner {
+    --color: #3b82f6;
+}

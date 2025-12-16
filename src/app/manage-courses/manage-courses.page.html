@@ -1,50 +1,63 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Gestionar Cursos</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content>
-  @if (cursos$ | async; as cursos) {
-    @if (cursos.length > 0) {
-      <ion-list [inset]="true">
-        @for (curso of cursos; track curso.id) {
-          <ion-item-sliding>
-            <ion-item>
-              <ion-label>
-                <h2>{{ curso.nombre }}</h2>
-                <p>{{ curso.area }}</p>
-              </ion-label>
-            </ion-item>
-
-            <ion-item-options side="end">
-              <ion-item-option color="light" (click)="editCourse(curso)">
-                <ion-icon slot="icon-only" [icon]="icons['createOutline']"></ion-icon>
-              </ion-item-option>
-              <ion-item-option color="danger" (click)="deleteCourse(curso)">
-                <ion-icon slot="icon-only" [icon]="icons['trashOutline']"></ion-icon>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
-        }
-      </ion-list>
-    } @else {
-      <div class="ion-text-center ion-padding">
-        <p>No hay cursos definidos en el sistema.</p>
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/tabs/tab1" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="header-title">
+        <h1>Gestionar Cursos</h1>
       </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    @if (cursos$ | async; as cursos) {
+    @if (cursos.length > 0) {
+    <!-- 1. Iteramos para crear una tarjeta por cada curso -->
+    @for (curso of cursos; track curso.id) {
+    <div class="course-card">
+      <div class="course-header">
+        <h3>{{ curso.nombre }}</h3>
+        <p>{{ curso.area }}</p>
+      </div>
+
+      <!-- 2. Acciones visibles en la parte inferior de la tarjeta -->
+      <div class="card-actions">
+        <ion-button fill="clear" size="small" (click)="editCourse(curso)">
+          <ion-icon slot="start" [icon]="icons['createOutline']"></ion-icon>
+          Editar
+        </ion-button>
+        <ion-button fill="clear" size="small" color="danger" (click)="deleteCourse(curso)">
+          <ion-icon slot="start" [icon]="icons['trashOutline']"></ion-icon>
+          Eliminar
+        </ion-button>
+      </div>
+    </div>
     }
-  } @else {
-    <div class="ion-text-center ion-padding">
+    } @else {
+    <!-- 3. Estado vacío mejorado visualmente -->
+    <div class="empty-state">
+      <ion-icon name="book-outline"></ion-icon>
+      <h2>No hay cursos</h2>
+      <p>Añade un nuevo curso usando el botón de abajo.</p>
+    </div>
+    }
+    } @else {
+    <!-- Estado de carga -->
+    <div class="spinner-container">
       <ion-spinner name="crescent"></ion-spinner>
     </div>
-  }
+    }
+  </div>
 
+  <!-- El FAB se mantiene para añadir nuevos cursos -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="addNewCourse()">
+    <ion-fab-button (click)="addNewCourse()" class="main-fab">
       <ion-icon [icon]="icons['add']"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
 </ion-content>

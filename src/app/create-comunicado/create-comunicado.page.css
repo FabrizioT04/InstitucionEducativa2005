@@ -1,0 +1,95 @@
+/* Dark Theme Create Communication Styles */
+
+ion-content {
+  --background: #121212;
+  /* Dark Background */
+}
+
+/* Header Background */
+.header-background {
+  background: #3b82f6;
+  /* Solid Blue */
+  padding: 60px 24px 80px 24px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: none;
+  /* Flat design */
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+.header-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0 16px;
+}
+
+/* Main Container */
+.main-container {
+  padding: 0 16px;
+  margin-top: -60px;
+  /* Overlap */
+}
+
+/* Form Styles */
+.input-group {
+  margin-bottom: 24px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 8px;
+  margin-left: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.custom-input {
+  --background: #ffffff;
+  /* Dark Card */
+  --color: #050505;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --min-height: 50px;
+  border: 1px solid #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.textarea-input {
+  --min-height: 150px;
+  align-items: flex-start;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+}
+
+ion-input,
+ion-textarea {
+  --placeholder-color: #9ca3af;
+  --color: #050505;
+}
+
+/* Buttons */
+.action-container {
+  margin-top: 40px;
+}
+
+.publish-btn {
+  --background: #3b82f6;
+  --color: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  height: 50px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  margin: 0;
+}

@@ -1,61 +1,148 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button [defaultHref]="courseId ? '/course-detail/' + courseId : '/tabs/tab2'"></ion-back-button>
+      <!-- Este es el botón de "atrás" correcto y simple -->
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
     </ion-buttons>
     <ion-title>{{ tituloClase }}</ion-title>
+    <ion-buttons slot="end">
+      <!-- Botón para guardar -->
+      <ion-button (click)="saveGrades()" [disabled]="guardando">
+        <ion-icon slot="icon-only" name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-spinner *ngIf="cargando" name="crescent" class="spinner-center"></ion-spinner>
-
-  <div *ngIf="!cargando">
-    <ion-grid>
-      <!-- Fila de Encabezado -->
-      <ion-row class="header-row">
-        <ion-col size="4">Estudiante</ion-col>
-        <ion-col size="1.5" class="ion-text-center">Bim. 1</ion-col>
-        <ion-col size="1.5" class="ion-text-center">Bim. 2</ion-col>
-        <ion-col size="1.5" class="ion-text-center">Bim. 3</ion-col>
-        <ion-col size="1.5" class="ion-text-center">Bim. 4</ion-col>
-        <ion-col size="2" class="ion-text-center">Prom.</ion-col>
-      </ion-row>
-
-      <div *ngIf="estudiantesConNotas.length === 0" class="ion-text-center ion-padding">
-        No hay estudiantes inscritos para calificar.
-      </div>
-
-      <!-- Fila por cada Estudiante -->
-      <ion-row *ngFor="let item of estudiantesConNotas" class="data-row ion-align-items-center">
-        <ion-col size="4">{{ item.nombreCompleto }}</ion-col>
-        <ion-col size="1.5">
-          <ion-input type="number" class="grade-input" [(ngModel)]="item.notas.bimestre1" (ionChange)="calcularPromedio(item)"></ion-input>
-        </ion-col>
-        <ion-col size="1.5">
-          <ion-input type="number" class="grade-input" [(ngModel)]="item.notas.bimestre2" (ionChange)="calcularPromedio(item)"></ion-input>
-        </ion-col>
-        <ion-col size="1.5">
-          <ion-input type="number" class="grade-input" [(ngModel)]="item.notas.bimestre3" (ionChange)="calcularPromedio(item)"></ion-input>
-        </ion-col>
-        <ion-col size="1.5">
-          <ion-input type="number" class="grade-input" [(ngModel)]="item.notas.bimestre4" (ionChange)="calcularPromedio(item)"></ion-input>
-        </ion-col>
-        <ion-col size="2" class="ion-text-center">
-          <strong>{{ item.notas.promedioFinal | number:'1.1-2' }}</strong>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+<ion-content>
+  <!-- Estado de carga inicial -->
+  @if (cargando) {
+  <div class="ion-text-center ion-padding-top">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando estudiantes...</p>
   </div>
+  }
 
-  <ion-footer class="ion-no-border" *ngIf="!cargando && estudiantesConNotas.length > 0">
-    <ion-toolbar>
-      <ion-button (click)="saveGrades()" expand="block" color="primary" class="ion-margin" [disabled]="guardando">
-        <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-        <span *ngIf="!guardando">Guardar Notas</span>
-        <ion-icon *ngIf="!guardando" slot="end" name="save-outline"></ion-icon>
-      </ion-button>
-    </ion-toolbar>
-  </ion-footer>
+  <!-- Si no hay estudiantes -->
+  @if (!cargando && estudiantesConNotas.length === 0) {
+  <div class="ion-text-center ion-padding-top">
+    <ion-label>No hay estudiantes inscritos para calificar.</ion-label>
+  </div>
+  }
+
+  <!-- 
+    Tabla de calificaciones
+    Usamos un div con 'overflow-x: auto' para hacer la tabla responsive 
+    y permitir scroll horizontal en pantallas pequeñas.
+  -->
+  @if (!cargando && estudiantesConNotas.length > 0) {
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Estudiante</th>
+          <th>Trim. 1</th>
+          <th>Trim. 2</th>
+          <th>Trim. 3</th>
+          <th>Prom.</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of estudiantesConNotas; track item.id) {
+        <tr>
+          <!-- Nombre del Estudiante -->
+          <td class="student-name">{{ item.nombreCompleto }}</td>
+
+          <!-- Input para Trimestre 1 -->
+          <td>
+            <ion-input
+              type="number"
+              [(ngModel)]="item.notas.trimestre1"
+              (ionChange)="calcularPromedio(item)"
+              class="grade-input"
+            ></ion-input>
+          </td>
+
+          <!-- Input para Trimestre 2 -->
+          <td>
+            <ion-input
+              type="number"
+              [(ngModel)]="item.notas.trimestre2"
+              (ionChange)="calcularPromedio(item)"
+              class="grade-input"
+            ></ion-input>
+          </td>
+
+          <!-- Input para Trimestre 3 -->
+          <td>
+            <ion-input
+              type="number"
+              [(ngModel)]="item.notas.trimestre3"
+              (ionChange)="calcularPromedio(item)"
+              class="grade-input"
+            ></ion-input>
+          </td>
+
+          <!-- Promedio (Solo lectura) -->
+          <td>
+            <span class="promedio-final">{{ item.notas.promedioFinal | number:'1.1-2' }}</span>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
 </ion-content>
 
+<!-- Estilos CSS para la tabla -->
+<style>
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+  }
+  th, td {
+    border: 1px solid var(--ion-color-medium-shade);
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  th {
+    background-color: var(--ion-color-light-shade);
+    font-weight: bold;
+    min-width: 60px;
+  }
+  .student-name {
+    text-align: left;
+    font-weight: 500;
+    min-width: 150px;
+    white-space: nowrap;
+  }
+  .grade-input {
+    border: 1px solid var(--ion-color-step-200, #cccccc);
+    border-radius: 4px;
+    --padding-start: 4px;
+    --padding-end: 4px;
+    text-align: center;
+    width: 50px;
+  }
+  /* Ocultar las flechas de number input */
+  ion-input[type="number"]::-webkit-outer-spin-button,
+  ion-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  ion-input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  .promedio-final {
+    font-weight: bold;
+    color: var(--ion-color-primary);
+  }
+</style>

@@ -16,7 +16,7 @@ export interface Curso {
 @Component({
   selector: 'app-manage-courses',
   templateUrl: './manage-courses.page.html',
-  styleUrls: ['./manage-courses.page.scss'],
+  styleUrls: ['./manage-courses.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule],
 })
@@ -134,3 +134,4 @@ export class ManageCoursesPage implements OnInit {
     toast.present();
   }
 }
+

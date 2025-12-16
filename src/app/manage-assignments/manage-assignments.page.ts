@@ -1,7 +1,20 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, NavController, ToastController } from '@ionic/angular';
+import {
+  NavController,
+  ToastController,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonList,
+  IonListHeader,
+  IonLabel,
+  IonItem,
+  IonSelect,
+  IonSelectOption,
+  IonButton
+} from '@ionic/angular/standalone';
 import { ActivatedRoute } from '@angular/router';
 import { Firestore, collection, doc, getDoc, collectionData, query, where, setDoc, addDoc, updateDoc } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
@@ -9,9 +22,22 @@ import { Observable, of } from 'rxjs';
 @Component({
   selector: 'app-manage-assignments',
   templateUrl: './manage-assignments.page.html',
-  styleUrls: ['./manage-assignments.page.scss'],
+  styleUrls: ['./manage-assignments.page.css'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [
+    IonContent,
+    IonButtons,
+    IonBackButton,
+    IonList,
+    IonListHeader,
+    IonLabel,
+    IonItem,
+    IonSelect,
+    IonSelectOption,
+    IonButton,
+    CommonModule,
+    FormsModule
+  ],
 })
 export class ManageAssignmentsPage implements OnInit {
   public pageTitle = 'Crear Asignación';
@@ -21,7 +47,7 @@ export class ManageAssignmentsPage implements OnInit {
     gradoId: '',
     profesorId: '',
   };
-  
+
   public cursos$: Observable<any[]> = of([]);
   public grados$: Observable<any[]> = of([]);
   public profesores$: Observable<any[]> = of([]);
@@ -31,7 +57,7 @@ export class ManageAssignmentsPage implements OnInit {
   private navCtrl = inject(NavController);
   private toastCtrl = inject(ToastController);
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit() {
     this.asignacionId = this.route.snapshot.paramMap.get('id');
@@ -94,4 +120,5 @@ export class ManageAssignmentsPage implements OnInit {
     toast.present();
   }
 }
+
 

@@ -1,40 +1,52 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/login"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Crear Cuenta</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content class="ion-padding">
-  <div class="login-header">
-    <ion-icon name="person-add-outline" color="primary" class="header-icon"></ion-icon>
-    <h1>Regístrate</h1>
-    <p>Crea una nueva cuenta para acceder a la plataforma.</p>
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/login" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="header-title">
+        <h1>Crear Cuenta</h1>
+      </div>
+    </div>
   </div>
 
-  <ion-list class="ion-no-padding">
-    <!-- ¡NUEVO CAMPO! -->
-    <ion-item lines="full">
-      <ion-input label="Nombre Completo" labelPlacement="floating" [(ngModel)]="nombreCompleto" required></ion-input>
-    </ion-item>
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="form-container">
 
-    <ion-item lines="full">
-      <ion-input label="Correo Electrónico" labelPlacement="floating" [(ngModel)]="email" type="email" required></ion-input>
-    </ion-item>
+      <!-- Lista de campos de entrada -->
+      <ion-list class="ion-no-padding">
+        <ion-item>
+          <ion-input label="Nombre Completo" labelPlacement="floating" [(ngModel)]="nombreCompleto"
+            required></ion-input>
+        </ion-item>
 
-    <ion-item lines="full">
-      <ion-input label="Contraseña" labelPlacement="floating" [(ngModel)]="password" type="password" required></ion-input>
-    </ion-item>
+        <ion-item>
+          <ion-input label="Correo Electrónico" labelPlacement="floating" [(ngModel)]="email" type="email"
+            required></ion-input>
+        </ion-item>
 
-    <ion-item lines="full">
-      <ion-input label="Confirmar Contraseña" labelPlacement="floating" [(ngModel)]="confirmPassword" type="password" required></ion-input>
-    </ion-item>
-  </ion-list>
-  
-  <ion-button expand="block" (click)="register()" [disabled]="!nombreCompleto || !email || !password || password !== confirmPassword" class="ion-margin-top">
-    Registrarse
-  </ion-button>
+        <ion-item>
+          <ion-input label="Contraseña" labelPlacement="floating" [(ngModel)]="password" type="password"
+            required></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Confirmar Contraseña" labelPlacement="floating" [(ngModel)]="confirmPassword"
+            type="password" required></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <!-- Botón de acción principal -->
+      <div class="ion-padding-vertical">
+        <ion-button expand="block" (click)="register()"
+          [disabled]="!nombreCompleto || !email || !password || password !== confirmPassword">
+          Registrarse
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
 </ion-content>
-

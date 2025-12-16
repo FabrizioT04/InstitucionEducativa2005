@@ -8,7 +8,7 @@ import { Firestore, doc, getDoc, updateDoc } from '@angular/fire/firestore';
 @Component({
   selector: 'app-edit-course',
   templateUrl: './edit-course.page.html',
-  styleUrls: ['./edit-course.page.scss'],
+  styleUrls: ['./edit-course.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
@@ -77,3 +77,4 @@ export class EditCoursePage implements OnInit {
     toast.present();
   }
 }
+

@@ -1,18 +1,19 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController, AlertController, ToastController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
 import { Firestore, collection, query, where, onSnapshot, doc, deleteDoc, collectionData } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
-import { createOutline, trashOutline, add } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
+import { createOutline, trashOutline, add, peopleOutline, people } from 'ionicons/icons';
 
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.page.html',
-  styleUrls: ['./user-list.page.scss'],
+  styleUrls: ['./user-list.page.css'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [IonicModule, CommonModule, FormsModule, TitleCasePipe],
 })
 export class UserListPage implements OnInit {
   public users: any[] = [];
@@ -22,7 +23,6 @@ export class UserListPage implements OnInit {
   public searchTerm = '';
   public userRoleFilter: string | null = null;
 
-  // --- VARIABLES PARA EL FILTRO DE GRADO (AHORA PÚBLICAS) ---
   public grados$: Observable<any[]> = of([]);
   public selectedGradeId: string = 'all';
 
@@ -32,7 +32,9 @@ export class UserListPage implements OnInit {
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
 
-  constructor() {}
+  constructor() {
+    addIcons({ createOutline, trashOutline, add, peopleOutline, people });
+  }
 
   ngOnInit() {
     this.userRoleFilter = this.route.snapshot.paramMap.get('role');
@@ -46,7 +48,7 @@ export class UserListPage implements OnInit {
   }
 
   get icons() {
-    return { createOutline, trashOutline, add };
+    return { createOutline, trashOutline, add, peopleOutline, people };
   }
 
   loadGrados() {
@@ -78,7 +80,7 @@ export class UserListPage implements OnInit {
     if (!term) {
       this.users = [...this.allUsers];
     } else {
-      this.users = this.allUsers.filter(user => 
+      this.users = this.allUsers.filter(user =>
         user.nombreCompleto.toLowerCase().includes(term) ||
         user.email.toLowerCase().includes(term)
       );
@@ -90,7 +92,6 @@ export class UserListPage implements OnInit {
     this.filterUsers();
   }
 
-  // --- FUNCIÓN PARA EL FILTRO DE GRADO (AHORA PÚBLICA) ---
   handleGradeFilterChange(event: any) {
     this.selectedGradeId = event.detail.value;
     this.loadUsers();
@@ -100,28 +101,34 @@ export class UserListPage implements OnInit {
     this.navCtrl.navigateForward('/create-user');
   }
 
-  goToEditUser(userId: string) {
+  // 1. MODIFICADO: Acepta un evento opcional y detiene la propagación si existe.
+  goToEditUser(userId: string, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.navCtrl.navigateForward(`/edit-user/${userId}`);
   }
 
-  async deleteUser(userId: string, userName: string) {
+  // 2. MODIFICADO: Acepta el evento y detiene la propagación.
+  async deleteUser(userId: string, userName: string, event: Event) {
+    event.stopPropagation();
     const alert = await this.alertCtrl.create({
-        header: 'Confirmar Eliminación',
-        message: `¿Estás seguro de que quieres eliminar a ${userName}?`,
-        buttons: [
-            { text: 'Cancelar', role: 'cancel' },
-            {
-                text: 'Eliminar',
-                handler: async () => {
-                    try {
-                        await deleteDoc(doc(this.firestore, 'usuarios', userId));
-                        this.presentToast('Usuario eliminado con éxito.', 'success');
-                    } catch (error) {
-                        this.presentToast('Error al eliminar el usuario.', 'danger');
-                    }
-                }
+      header: 'Confirmar Eliminación',
+      message: `¿Estás seguro de que quieres eliminar a ${userName}?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          handler: async () => {
+            try {
+              await deleteDoc(doc(this.firestore, 'usuarios', userId));
+              this.presentToast('Usuario eliminado con éxito.', 'success');
+            } catch (error) {
+              this.presentToast('Error al eliminar el usuario.', 'danger');
             }
-        ]
+          }
+        }
+      ]
     });
     await alert.present();
   }
@@ -139,4 +146,9 @@ export class UserListPage implements OnInit {
       default: return 'medium';
     }
   }
+
+  getUserImage(user: any): string {
+    return user.photoURL || 'assets/icon/favicon.png';
+  }
 }
+

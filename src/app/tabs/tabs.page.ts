@@ -1,20 +1,21 @@
 import { Component } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 // Se cambia el ícono de 'newspaper' por 'home'
-import { homeOutline, schoolOutline, personCircleOutline } from 'ionicons/icons';
+import { home, book, personCircle } from 'ionicons/icons';
 
 @Component({
   selector: 'app-tabs',
   templateUrl: 'tabs.page.html',
-  styleUrls: ['tabs.page.scss'],
+  styleUrls: ['tabs.page.css'],
   standalone: true,
-  imports: [IonicModule],
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
 })
 export class TabsPage {
   constructor() {
-    addIcons({ homeOutline, schoolOutline, personCircleOutline });
+    addIcons({ home, book, personCircle });
   }
 }
+
 
 

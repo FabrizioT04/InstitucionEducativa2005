@@ -1,0 +1,10 @@
+ion-content {
+  --background: #f4f5f8;
+  /* Fondo gris claro para que las listas inset resalten */
+}
+
+/* Ajuste para que el texto del botón de fecha se vea bien */
+ion-datetime-button {
+  width: 100%;
+  text-align: end;
+}

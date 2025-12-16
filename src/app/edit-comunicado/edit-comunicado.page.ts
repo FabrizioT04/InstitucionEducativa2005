@@ -1,16 +1,44 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, NavController, ToastController } from '@ionic/angular';
+import {
+  NavController,
+  ToastController,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonList,
+  IonListHeader,
+  IonLabel,
+  IonItem,
+  IonInput,
+  IonTextarea,
+  IonButton,
+  IonSpinner
+} from '@ionic/angular/standalone';
 import { ActivatedRoute } from '@angular/router';
 import { Firestore, doc, getDoc, updateDoc } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-edit-comunicado',
   templateUrl: './edit-comunicado.page.html',
-  styleUrls: ['./edit-comunicado.page.scss'],
+  styleUrls: ['./edit-comunicado.page.css'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonContent,
+    IonButtons,
+    IonBackButton,
+    IonList,
+    IonListHeader,
+    IonLabel,
+    IonItem,
+    IonInput,
+    IonTextarea,
+    IonButton,
+    IonSpinner,
+    CommonModule,
+    FormsModule
+  ]
 })
 export class EditComunicadoPage implements OnInit {
   comunicado: any = {

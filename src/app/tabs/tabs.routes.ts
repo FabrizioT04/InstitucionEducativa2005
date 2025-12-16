@@ -16,11 +16,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('../tab2/tab2.page').then((m) => m.Tab2Page),
       },
-      {
-        path: 'schedule', // Ruta para el nuevo Horario
-        loadChildren: () =>
-          import('../schedule/schedule.routes').then((m) => m.routes),
-      },
+  
       {
         path: 'tab3', // Ruta para Perfil
         loadComponent: () =>

@@ -1,170 +1,147 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController } from '@ionic/angular';
-import { ActivatedRoute, ParamMap } from '@angular/router';
-import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
-import { Firestore, doc, getDoc, collection, query, where, getDocs, limit } from '@angular/fire/firestore';
-import { addIcons } from 'ionicons';
-import { personCircleOutline, personAddOutline, checkboxOutline, documentTextOutline, timeOutline } from 'ionicons/icons';
+import { Auth, User, onAuthStateChanged } from '@angular/fire/auth';
+import {
+  Firestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+  Timestamp,
+} from '@angular/fire/firestore';
+
+// Interface para agrupar
+interface AsignacionConAsistencias {
+  id: string;
+  nombreCurso: string;
+  nombreGrado: string;
+  asistencias: any[];
+}
 
 @Component({
   selector: 'app-attendance-history',
   templateUrl: './attendance-history.page.html',
-  styleUrls: ['./attendance-history.page.scss'],
+  styleUrls: ['./attendance-history.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule],
 })
 export class AttendanceHistoryPage implements OnInit {
+  public currentUser: User | null = null;
+  public isLoading = true; // <-- Aquí está la propiedad
+  public gruposDeAsistencias: AsignacionConAsistencias[] = [];
 
-  public curso: any = null;
-  public profesor: any = null;
-  public cargando = true;
-  public esProfesorDelCurso = false;
-  public esEstudianteDelCurso = false;
-  public misNotas: any = null;
-  public historialAsistencias: any[] = [];
-  public miHistorialAsistencia: any[] = [];
+  private firestore: Firestore = inject(Firestore);
+  private auth: Auth = inject(Auth);
+  private navCtrl: NavController = inject(NavController);
 
-  private courseId: string | null = null;
-  private currentUser: User | null = null;
-  private asignacionId: string | null = null;
-
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private firestore: Firestore,
-    private auth: Auth,
-    private navController: NavController,
-    private cdr: ChangeDetectorRef
-  ) {
-    addIcons({ personCircleOutline, personAddOutline, checkboxOutline, documentTextOutline, timeOutline });
-  }
+  constructor() {}
 
   ngOnInit() {
-    this.activatedRoute.paramMap.subscribe((params: ParamMap) => {
-      const idFromRoute = params.get('id');
-      if (idFromRoute) {
-        this.courseId = idFromRoute;
-        onAuthStateChanged(this.auth, (user) => {
-          if (user) {
-            this.currentUser = user;
-            this.loadCourseData(this.courseId!);
-          } else {
-            this.navController.navigateRoot('/login');
-          }
-        });
+    onAuthStateChanged(this.auth, (user) => {
+      if (user) {
+        this.currentUser = user;
+        this.loadAllMyAttendance(user.uid);
+      } else {
+        this.navCtrl.navigateRoot('/login');
       }
     });
   }
 
-  async loadCourseData(id: string) {
-    this.cargando = true;
+  async loadAllMyAttendance(studentId: string) {
+    this.isLoading = true;
     try {
-      const courseDocRef = doc(this.firestore, 'cursos', id);
-      const courseSnap = await getDoc(courseDocRef);
-      if (!courseSnap.exists()) { return; }
-      this.curso = courseSnap.data();
-      this.curso.id = courseSnap.id;
+      // 1. Obtener todas las asistencias del estudiante
+      const qAsistencias = query(
+        collection(this.firestore, 'asistencias'),
+        where('estudianteId', '==', studentId) // Usamos 'estudianteId' (como en manage-attendance)
+      );
+      const asistenciasSnap = await getDocs(qAsistencias);
 
-      const asignacionQuery = query(collection(this.firestore, 'asignaciones'), where("cursoId", "==", id), limit(1));
-      const asignacionSnapshot = await getDocs(asignacionQuery);
+      if (asistenciasSnap.empty) {
+        this.isLoading = false;
+        return;
+      }
 
-      if (!asignacionSnapshot.empty) {
-        const asignacionData = asignacionSnapshot.docs[0].data();
-        this.asignacionId = asignacionSnapshot.docs[0].id;
-        const profesorId = asignacionData['profesorId'];
-        if (profesorId) {
-          const userDocRef = doc(this.firestore, 'usuarios', profesorId);
-          const userSnap = await getDoc(userDocRef);
-          if (userSnap.exists()) {
-            this.profesor = userSnap.data();
-          }
+      // 2. Agrupar asistencias por 'asignacionId'
+      const asistenciasPorAsignacion = new Map<string, any[]>();
+      asistenciasSnap.forEach((doc) => {
+        const asistencia = doc.data();
+        const asignacionId = asistencia['asignacionId'];
+        if (!asignacionId) return;
+
+        if (!asistenciasPorAsignacion.has(asignacionId)) {
+          asistenciasPorAsignacion.set(asignacionId, []);
         }
-      }
+        
+        // Convertir Timestamp a Date
+        const fecha = (asistencia['fecha'] as Timestamp).toDate();
+        asistenciasPorAsignacion
+          .get(asignacionId)
+          ?.push({ id: doc.id, ...asistencia, fecha });
+      });
 
-      if (this.currentUser && this.profesor) {
-         this.esProfesorDelCurso = this.currentUser.uid === this.profesor['uid'];
-      }
-      
-      if (this.currentUser && this.asignacionId) {
-        const inscripcionQuery = query(
-            collection(this.firestore, 'inscripciones'),
-            where("asignacionId", "==", this.asignacionId),
-            where("estudianteId", "==", this.currentUser.uid),
-            limit(1)
-        );
-        const inscripcionSnapshot = await getDocs(inscripcionQuery);
-        this.esEstudianteDelCurso = !inscripcionSnapshot.empty;
+      // 3. Obtener los detalles de cada asignación
+      const promesas = Array.from(asistenciasPorAsignacion.keys()).map(
+        async (asignacionId) => {
+          const asignacionRef = doc(this.firestore, 'asignaciones', asignacionId);
+          const asignacionSnap = await getDoc(asignacionRef);
+          if (!asignacionSnap.exists()) return null;
 
-        if (this.esEstudianteDelCurso) {
-          const calificacionesQuery = query(
-            collection(this.firestore, 'calificaciones'),
-            where("asignacionId", "==", this.asignacionId),
-            where("estudianteId", "==", this.currentUser.uid),
-            limit(1)
+          const asignacionData = asignacionSnap.data();
+
+          // Cargar nombres de curso y grado
+          const cursoRef = doc(this.firestore, 'cursos', asignacionData['cursoId']);
+          const gradoRef = doc(this.firestore, 'grados', asignacionData['gradoId']);
+          const [cursoSnap, gradoSnap] = await Promise.all([
+            getDoc(cursoRef),
+            getDoc(gradoRef),
+          ]);
+
+          const nombreCurso = cursoSnap.exists()
+            ? cursoSnap.data()['nombre']
+            : 'Curso Desconocido';
+          const nombreGrado = gradoSnap.exists()
+            ? `${gradoSnap.data()['nombre']} - ${gradoSnap.data()['seccion']}`
+            : '';
+          
+          // Ordenar asistencias por fecha (más reciente primero)
+          const asistencias = (asistenciasPorAsignacion.get(asignacionId) || []).sort(
+            (a, b) => b.fecha.getTime() - a.fecha.getTime()
           );
-          const calificacionesSnapshot = await getDocs(calificacionesQuery);
-          if (!calificacionesSnapshot.empty) {
-            this.misNotas = calificacionesSnapshot.docs[0].data()['notas'];
-          }
-        }
-      }
 
-      if(this.asignacionId) {
-        this.cargarHistorialAsistencias();
-      }
+          return {
+            id: asignacionId,
+            nombreCurso,
+            nombreGrado,
+            asistencias,
+          };
+        }
+      );
+
+      // 4. Filtrar nulos y asignar
+      this.gruposDeAsistencias = (await Promise.all(promesas)).filter(
+        (g) => g !== null
+      ) as AsignacionConAsistencias[];
 
     } catch (error) {
-      console.error("Error al cargar los datos del curso:", error);
+      console.error('Error cargando todas las asistencias:', error);
     } finally {
-      this.cargando = false;
-      this.cdr.detectChanges();
+      this.isLoading = false;
     }
   }
-
-  async cargarHistorialAsistencias() {
-    if (!this.asignacionId || !this.currentUser) return;
   
-    let asistenciaQuery;
-    
-    if (this.esProfesorDelCurso) {
-      asistenciaQuery = query(
-        collection(this.firestore, 'asistencias'),
-        where("asignacionId", "==", this.asignacionId)
-      );
-    } else if (this.esEstudianteDelCurso) {
-      asistenciaQuery = query(
-        collection(this.firestore, 'asistencias'),
-        where("asignacionId", "==", this.asignacionId),
-        where("estudianteId", "==", this.currentUser.uid)
-      );
-    } else {
-      return;
-    }
-  
-    const asistenciaSnapshot = await getDocs(asistenciaQuery);
-    const asistenciasPromises = asistenciaSnapshot.docs.map(async (asistenciaDoc) => {
-      const asistenciaData = asistenciaDoc.data();
-      const estudianteId = asistenciaData['estudianteId'];
-      const userDocRef = doc(this.firestore, 'usuarios', estudianteId);
-      const userSnap = await getDoc(userDocRef);
-      const nombreCompleto = userSnap.exists() ? userSnap.data()['nombreCompleto'] : 'Estudiante Desconocido';
-      
-      return {
-        ...asistenciaData,
-        id: asistenciaDoc.id,
-        fecha: (asistenciaData['fecha']).toDate(),
-        nombreEstudiante: nombreCompleto,
-      };
+  // Helper para formatear la fecha
+  // <-- Aquí está la función (usada por el .html)
+  formatDate(date: Date | undefined): string {
+    if (!date) return '';
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
-  
-    const asistencias = await Promise.all(asistenciasPromises);
-    asistencias.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
-
-    if (this.esProfesorDelCurso) {
-      this.historialAsistencias = asistencias;
-    } else if (this.esEstudianteDelCurso) {
-      this.miHistorialAsistencia = asistencias;
-    }
   }
 }

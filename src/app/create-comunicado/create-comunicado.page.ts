@@ -7,7 +7,7 @@ import { Firestore, collection, addDoc, serverTimestamp } from '@angular/fire/fi
 @Component({
   selector: 'app-create-comunicado',
   templateUrl: './create-comunicado.page.html',
-  styleUrls: ['./create-comunicado.page.scss'],
+  styleUrls: ['./create-comunicado.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })

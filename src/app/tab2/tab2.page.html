@@ -1,71 +1,84 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-title>
-      Clases Asignadas
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Clases</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  @if (asignaciones$ | async; as asignaciones) {
-    @if (asignaciones.length > 0) {
-      <ion-list [inset]="true">
-        @for (asignacion of asignaciones; track asignacion.id) {
-          <ion-item-sliding>
-            <ion-item button="true" [detail]="true" (click)="goToCourseDetail(asignacion.id)">
-              <ion-icon [icon]="icons['bookOutline']" slot="start" color="primary"></ion-icon>
-              <ion-label>
-                <h2>{{ asignacion.nombreCurso }}</h2>
-                <p>{{ asignacion.nombreGrado }}</p>
-                <p>Profesor: {{ asignacion.nombreProfesor }}</p>
-              </ion-label>
-            </ion-item>
-
-            @if (userRole === 'administrador') {
-              <ion-item-options side="end">
-                <ion-item-option color="secondary" (click)="goToManageSchedule(asignacion.id)">
-                  <ion-icon slot="icon-only" [icon]="icons['timeOutline']"></ion-icon>
-                  Horario
-                </ion-item-option>
-                <ion-item-option color="light" (click)="goToEditAssignment(asignacion.id)">
-                  <ion-icon slot="icon-only" [icon]="icons['createOutline']"></ion-icon>
-                </ion-item-option>
-                <ion-item-option color="danger" (click)="deleteAssignment(asignacion)">
-                  <ion-icon slot="icon-only" [icon]="icons['trashOutline']"></ion-icon>
-                </ion-item-option>
-              </ion-item-options>
-            }
-          </ion-item-sliding>
-        }
-      </ion-list>
-    } @else {
-      <div class="ion-text-center ion-padding">
-        <p>No hay clases asignadas en el sistema.</p>
+  <!-- Creative Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <div class="greeting">
+        <h1>Panel Académico</h1>
+        <h2>Clases Asignadas</h2>
       </div>
-    }
-  } @else {
-    <div class="ion-text-center ion-padding">
-      <ion-spinner name="crescent"></ion-spinner>
+      <div class="avatar-placeholder">
+        <ion-icon name="school" color="light"></ion-icon>
+      </div>
     </div>
-  }
+  </div>
 
-  <!-- BOTÓN FLOTANTE PARA CREAR ASIGNACIONES -->
+  <!-- Main Container -->
+  <div class="main-container">
+
+    <div class="section-wrapper">
+      <div class="section-header">
+        <h3>Mis Cursos</h3>
+      </div>
+
+      @if (asignaciones$ | async; as asignaciones) {
+      @if (asignaciones.length > 0) {
+      <div class="grid-actions">
+        @for (asignacion of asignaciones; track asignacion.id) {
+        <!-- Action Card -->
+        <div class="action-card" (click)="goToCourseDetail(asignacion.id)">
+          <div class="icon-box gradient-purple">
+            <ion-icon name="book"></ion-icon>
+          </div>
+
+          <div class="card-text">
+            <h4>{{ asignacion.nombreCurso }}</h4>
+            <p>{{ asignacion.nombreGrado }} • {{ asignacion.nombreProfesor }}</p>
+
+            <!-- Admin Actions -->
+            @if (userRole === 'administrador') {
+            <div class="card-actions-row" (click)="$event.stopPropagation()">
+              <ion-button fill="clear" size="small" (click)="goToManageSchedule(asignacion.id, $event)">
+                <ion-icon slot="icon-only" name="time-outline"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" size="small" (click)="goToEditAssignment(asignacion.id, $event)">
+                <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" color="danger" size="small" (click)="deleteAssignment(asignacion, $event)">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-button>
+            </div>
+            }
+          </div>
+
+          @if (userRole !== 'administrador') {
+          <ion-icon name="chevron-forward" class="arrow-icon"></ion-icon>
+          }
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="empty-state">
+        <ion-icon name="file-tray-stacked-outline"></ion-icon>
+        <h2>No hay clases asignadas</h2>
+        <p>Cuando se creen asignaciones de cursos, aparecerán aquí.</p>
+      </div>
+      }
+      } @else {
+      <div class="spinner-container">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- FAB -->
   @if (userRole === 'administrador') {
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button (click)="goToCreateAssignment()">
-        <ion-icon [icon]="icons['addCircleOutline']"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="goToCreateAssignment()" class="main-fab">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
   }
+
 </ion-content>
-
-
-
-
-

@@ -1,29 +1,48 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Editar Comunicado</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content class="ion-padding">
-  <ion-spinner *ngIf="cargando" name="crescent" class="spinner-center"></ion-spinner>
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/tabs/tab1" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="header-title">
+        <h1>Editar Comunicado</h1>
+      </div>
+    </div>
+  </div>
 
-  <div *ngIf="!cargando">
-    <ion-list>
+  <!-- Main Container -->
+  <div class="main-container">
+    @if (cargando) {
+    <div class="spinner-container">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+    } @else {
+    <!-- 1. Agrupamos los campos en una lista inset -->
+    <ion-list [inset]="true">
+      <ion-list-header>
+        <ion-label>Contenido del Comunicado</ion-label>
+      </ion-list-header>
       <ion-item>
-        <ion-input label="Título" labelPlacement="floating" [(ngModel)]="comunicado.titulo" type="text" required></ion-input>
+        <ion-input label="Título" labelPlacement="floating" [(ngModel)]="comunicado.titulo" type="text"
+          required></ion-input>
       </ion-item>
       <ion-item>
-        <ion-textarea label="Mensaje" labelPlacement="floating" [(ngModel)]="comunicado.mensaje" [autoGrow]="true" required></ion-textarea>
+        <ion-textarea label="Mensaje" labelPlacement="floating" [(ngModel)]="comunicado.mensaje" [autoGrow]="true"
+          required>
+        </ion-textarea>
       </ion-item>
     </ion-list>
 
-    <ion-button expand="block" (click)="guardarCambios()" [disabled]="guardando" class="ion-margin-top">
-      <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-      <span *ngIf="!guardando">Guardar Cambios</span>
-    </ion-button>
+    <!-- 2. Botón de acción con padding -->
+    <div class="ion-padding-vertical">
+      <ion-button expand="block" (click)="guardarCambios()" [disabled]="guardando">
+        <span *ngIf="!guardando">Guardar Cambios</span>
+        <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+      </ion-button>
+    </div>
+    }
   </div>
-</ion-content>
 
+</ion-content>

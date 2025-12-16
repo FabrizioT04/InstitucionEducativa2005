@@ -1,50 +1,65 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab2"></ion-back-button>
-    </ion-buttons>
-    <ion-title>{{ pageTitle }}</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content class="ion-padding">
-  <ion-list>
-    <!-- Selector de Cursos -->
-    <ion-item>
-      <ion-select label="Curso" label-placement="floating" [(ngModel)]="asignacion.cursoId" interface="action-sheet">
-        @if (cursos$ | async; as cursos) {
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/tabs/tab2" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="header-title">
+        <h1>{{ pageTitle }}</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- 1. Agrupamos todos los campos en una lista inset -->
+    <ion-list [inset]="true">
+      <ion-list-header>
+        <ion-label>Detalles de la Asignación</ion-label>
+      </ion-list-header>
+
+      <!-- Selector de Cursos -->
+      <ion-item>
+        <ion-select label="Curso" [(ngModel)]="asignacion.cursoId" interface="action-sheet">
+          @if (cursos$ | async; as cursos) {
           @for (curso of cursos; track curso.id) {
-            <ion-select-option [value]="curso.id">{{ curso.nombre }}</ion-select-option>
+          <ion-select-option [value]="curso.id">{{ curso.nombre }}</ion-select-option>
           }
-        }
-      </ion-select>
-    </ion-item>
+          }
+        </ion-select>
+      </ion-item>
 
-    <!-- Selector de Grados -->
-    <ion-item>
-      <ion-select label="Grado y Sección" label-placement="floating" [(ngModel)]="asignacion.gradoId" interface="action-sheet">
-        @if (grados$ | async; as grados) {
+      <!-- Selector de Grados -->
+      <ion-item>
+        <ion-select label="Grado y Sección" [(ngModel)]="asignacion.gradoId" interface="action-sheet">
+          @if (grados$ | async; as grados) {
           @for (grado of grados; track grado.id) {
-            <ion-select-option [value]="grado.id">{{ grado.nombre }} - {{ grado.seccion }}</ion-select-option>
+          <ion-select-option [value]="grado.id">{{ grado.nombre }} - {{ grado.seccion }}</ion-select-option>
           }
-        }
-      </ion-select>
-    </ion-item>
+          }
+        </ion-select>
+      </ion-item>
 
-    <!-- Selector de Profesores -->
-    <ion-item>
-      <ion-select label="Profesor" label-placement="floating" [(ngModel)]="asignacion.profesorId" interface="action-sheet">
-        @if (profesores$ | async; as profesores) {
+      <!-- Selector de Profesores -->
+      <ion-item>
+        <ion-select label="Profesor" [(ngModel)]="asignacion.profesorId" interface="action-sheet">
+          @if (profesores$ | async; as profesores) {
           @for (profesor of profesores; track profesor.id) {
-            <ion-select-option [value]="profesor.id">{{ profesor.nombreCompleto }}</ion-select-option>
+          <ion-select-option [value]="profesor.id">{{ profesor.nombreCompleto }}</ion-select-option>
           }
-        }
-      </ion-select>
-    </ion-item>
-  </ion-list>
+          }
+        </ion-select>
+      </ion-item>
+    </ion-list>
 
-  <ion-button expand="block" (click)="saveAssignment()" class="ion-margin-top">
-    Guardar Asignación
-  </ion-button>
+    <!-- 2. Botón de acción con padding -->
+    <div class="ion-padding-vertical">
+      <ion-button expand="block" (click)="saveAssignment()">
+        Guardar Asignación
+      </ion-button>
+    </div>
+  </div>
+
 </ion-content>
-

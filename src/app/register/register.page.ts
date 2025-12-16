@@ -1,8 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
-import { NavController, ToastController } from '@ionic/angular/standalone';
+import {
+  NavController,
+  ToastController,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonList,
+  IonItem,
+  IonInput,
+  IonButton
+} from '@ionic/angular/standalone';
 // Importamos las herramientas de Auth y Firestore
 import { Auth, createUserWithEmailAndPassword, sendEmailVerification } from '@angular/fire/auth';
 import { Firestore, doc, setDoc } from '@angular/fire/firestore';
@@ -10,9 +19,19 @@ import { Firestore, doc, setDoc } from '@angular/fire/firestore';
 @Component({
   selector: 'app-register',
   templateUrl: './register.page.html',
-  styleUrls: ['./register.page.scss'],
+  styleUrls: ['./register.page.css'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonContent,
+    IonButtons,
+    IonBackButton,
+    IonList,
+    IonItem,
+    IonInput,
+    IonButton,
+    CommonModule,
+    FormsModule
+  ]
 })
 export class RegisterPage {
   // Variables para enlazar con los campos del formulario
@@ -80,3 +99,4 @@ export class RegisterPage {
     toast.present();
   }
 }
+

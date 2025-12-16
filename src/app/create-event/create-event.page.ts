@@ -7,7 +7,7 @@ import { Firestore, collection, addDoc, Timestamp } from '@angular/fire/firestor
 @Component({
   selector: 'app-create-event',
   templateUrl: './create-event.page.html',
-  styleUrls: ['./create-event.page.scss'],
+  styleUrls: ['./create-event.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })

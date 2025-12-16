@@ -1,43 +1,58 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Iniciar Sesión</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
+<ion-content class="login-content">
   <div class="login-container">
-    <div class="ion-text-center">
-      <h1>Bienvenido</h1>
-      <p>Ingresa tus credenciales para continuar</p>
+
+    <!-- Logo Section -->
+    <div class="logo-section">
+      <div class="logo-box">
+        <ion-icon name="layers" color="light"></ion-icon>
+      </div>
     </div>
 
-    <ion-list lines="none">
-      <ion-item>
-        <ion-input
-          label="Correo Electrónico"
-          label-placement="floating"
-          type="email"
-          [(ngModel)]="credentials.email"
-        ></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input
-          label="Contraseña"
-          label-placement="floating"
-          type="password"
-          [(ngModel)]="credentials.password"
-        ></ion-input>
-      </ion-item>
-    </ion-list>
+    <!-- Title Section -->
+    <div class="title-section">
+      <h1>Bienvenido de nuevo</h1>
+      <p>Inicia sesión para continuar</p>
+    </div>
 
-    <ion-button expand="block" (click)="login()" class="ion-margin-top">
-      Ingresar
-    </ion-button>
+    <!-- Form Section -->
+    <div class="form-section">
 
-    <div class="ion-text-center ion-margin-top">
-      <span>¿No tienes una cuenta? </span>
-      <!-- BOTÓN CORREGIDO PARA LLAMAR A LA FUNCIÓN -->
-      <ion-button fill="clear" size="small" (click)="goToRegister()">Regístrate</ion-button>
+      <!-- Email Input -->
+      <div class="input-wrapper">
+        <label>Correo Electrónico</label>
+        <div class="custom-input-container">
+          <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+          <input type="email" placeholder="Introduce tu correo electrónico" [(ngModel)]="credentials.email"
+            class="native-input">
+        </div>
+      </div>
+
+      <!-- Password Input -->
+      <div class="input-wrapper">
+        <label>Contraseña</label>
+        <div class="custom-input-container">
+          <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+          <input [type]="showPassword ? 'text' : 'password'" placeholder="Introduce tu contraseña"
+            [(ngModel)]="credentials.password" class="native-input">
+          <ion-icon [name]="showPassword ? 'eye-outline' : 'eye-off-outline'" class="password-toggle"
+            (click)="togglePassword()"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Forgot Password -->
+      <div class="forgot-password">
+        <a (click)="forgotPassword()">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <!-- Login Button -->
+      <ion-button expand="block" class="login-btn" (click)="login()" color="primary">INGRESAR</ion-button>
+
+      <!-- Register Link -->
+      <div class="register-link">
+        <span>¿No tienes una cuenta? </span>
+        <a (click)="goToRegister()">Regístrate aquí</a>
+      </div>
+
     </div>
   </div>
 </ion-content>

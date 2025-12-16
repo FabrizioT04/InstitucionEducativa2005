@@ -1,46 +1,43 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar color="primary">
-    <ion-title>
-      Mis Notas
-    </ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Todas mis Calificaciones</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Mis Notas</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-spinner *ngIf="cargando" name="crescent" style="display: block; margin: 80px auto;"></ion-spinner>
-
-  <div *ngIf="!cargando">
-    <ion-text *ngIf="misInscripciones.length === 0" color="medium">
-      <p class="ion-text-center ion-padding-top">Aún no estás inscrito en ningún curso.</p>
-    </ion-text>
-
-    <ion-card *ngFor="let inscripcion of misInscripciones">
-      <ion-card-header>
-        <ion-card-title>{{ inscripcion.curso.nombre }}</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-list>
-          <ion-item>
-            <ion-label>Parcial 1</ion-label>
-            <ion-note slot="end">{{ inscripcion.notas?.parcial1 || 'N/A' }}</ion-note>
-          </ion-item>
-          <ion-item>
-            <ion-label>Parcial 2</ion-label>
-            <ion-note slot="end">{{ inscripcion.notas?.parcial2 || 'N/A' }}</ion-note>
-          </ion-item>
-          <ion-item lines="full">
-            <ion-label><strong>Final</strong></ion-label>
-            <ion-note slot="end" color="primary"><strong>{{ inscripcion.notas?.final || 'N/A' }}</strong></ion-note>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+<ion-content>
+  @if (isLoading) {
+  <div class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando calificaciones...</p>
   </div>
-
+  } @else { @for (grupo of gruposDeCalificaciones; track grupo.id) {
+  <ion-list-header color="light">
+    {{ grupo.nombreCurso }} ({{ grupo.nombreGrado }})
+  </ion-list-header>
+  <ion-list [inset]="true">
+    @for (calificacion of grupo.calificaciones; track calificacion.id) {
+    <ion-item>
+      <ion-label>
+        <p>{{ calificacion.descripcion || 'Evaluación' }}</p>
+        <h3>{{ calificacion.nota || 'N/A' }}</h3>
+      </ion-label>
+      @if(calificacion.fecha) {
+      <ion-note slot="end">{{ formatTimestamp(calificacion.fecha) }}</ion-note>
+      }
+    </ion-item>
+    } @empty {
+    <ion-item lines="none">
+      <ion-label>No hay calificaciones para este curso.</ion-label>
+    </ion-item>
+    }
+  </ion-list>
+  } @empty { @if (!isLoading) {
+  <div class="ion-text-center ion-padding">
+    <ion-icon name="cloud-offline-outline" size="large"></ion-icon>
+    <p>No tienes calificaciones registradas en ninguna clase.</p>
+  </div>
+  } } }
 </ion-content>

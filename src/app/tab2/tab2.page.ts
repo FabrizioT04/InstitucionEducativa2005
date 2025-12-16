@@ -6,10 +6,11 @@ import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
 import { Firestore, collection, doc, getDoc, collectionData, deleteDoc } from '@angular/fire/firestore';
 import { Observable, combineLatest, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { bookOutline, timeOutline, createOutline, trashOutline, addCircleOutline } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
+import { book, timeOutline, createOutline, trashOutline, add, school, chevronForward, people } from 'ionicons/icons';
 
 export interface AsignacionCompleta {
-  id: string; 
+  id: string;
   nombreCurso: string;
   nombreGrado: string;
   nombreProfesor: string;
@@ -18,13 +19,13 @@ export interface AsignacionCompleta {
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
-  styleUrls: ['tab2.page.scss'],
+  styleUrls: ['tab2.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule],
 })
 export class Tab2Page implements OnInit {
   public userRole: string | null = null;
-  public asignaciones$: Observable<AsignacionCompleta[]> = of([]); 
+  public asignaciones$: Observable<AsignacionCompleta[]> = of([]);
   private currentUser: User | null = null;
 
   private firestore = inject(Firestore);
@@ -33,7 +34,9 @@ export class Tab2Page implements OnInit {
   private alertCtrl = inject(AlertController);
   private toastCtrl = inject(ToastController);
 
-  constructor() {}
+  constructor() {
+    addIcons({ book, timeOutline, createOutline, trashOutline, add, school, chevronForward, people });
+  }
 
   ngOnInit() {
     onAuthStateChanged(this.auth, (user) => {
@@ -46,7 +49,7 @@ export class Tab2Page implements OnInit {
   }
 
   get icons() {
-    return { bookOutline, timeOutline, createOutline, trashOutline, addCircleOutline };
+    return { book, timeOutline, createOutline, trashOutline, add, school, chevronForward, people };
   }
 
   async loadUserRole(uid: string) {
@@ -68,7 +71,7 @@ export class Tab2Page implements OnInit {
           const gradoRef = doc(this.firestore, 'grados', asignacion.gradoId);
           const profesorRef = doc(this.firestore, 'usuarios', asignacion.profesorId);
 
-          return combineLatest([ getDoc(cursoRef), getDoc(gradoRef), getDoc(profesorRef) ]).pipe(
+          return combineLatest([getDoc(cursoRef), getDoc(gradoRef), getDoc(profesorRef)]).pipe(
             map(([cursoSnap, gradoSnap, profesorSnap]) => ({
               id: asignacion.id,
               nombreCurso: cursoSnap.exists() ? cursoSnap.data()['nombre'] : '...',
@@ -81,18 +84,20 @@ export class Tab2Page implements OnInit {
       })
     );
   }
-  
+
   // --- FUNCIONES DE GESTIÓN ---
 
   goToCreateAssignment() {
     this.navCtrl.navigateForward('/manage-assignments');
   }
 
-  goToEditAssignment(asignacionId: string) {
+  goToEditAssignment(asignacionId: string, event: Event) {
+    event.stopPropagation();
     this.navCtrl.navigateForward(`/manage-assignments/${asignacionId}`);
   }
 
-  async deleteAssignment(asignacion: AsignacionCompleta) {
+  async deleteAssignment(asignacion: AsignacionCompleta, event: Event) {
+    event.stopPropagation();
     const alert = await this.alertCtrl.create({
       header: 'Confirmar Eliminación',
       message: `¿Estás seguro de que quieres eliminar la clase de ${asignacion.nombreCurso} (${asignacion.nombreGrado})?`,
@@ -119,18 +124,16 @@ export class Tab2Page implements OnInit {
     const toast = await this.toastCtrl.create({ message, duration: 2000, color });
     toast.present();
   }
-  
+
   // --- FUNCIONES DE NAVEGACIÓN ---
 
   goToCourseDetail(asignacionId: string) {
     this.navCtrl.navigateForward(`/course-detail/${asignacionId}`);
   }
-  
-  goToManageSchedule(asignacionId: string) {
+
+  goToManageSchedule(asignacionId: string, event: Event) {
+    event.stopPropagation();
     this.navCtrl.navigateForward(`/manage-schedule/${asignacionId}`);
   }
 }
-
-
-
 

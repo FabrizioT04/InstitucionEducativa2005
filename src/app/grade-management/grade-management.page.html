@@ -1,50 +1,65 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Gestionar Grados</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content class="ion-padding">
-  <div *ngIf="(grados$ | async) as grados">
-    <ion-list *ngIf="grados.length > 0; else noGrados">
-      <!-- Elemento deslizable para cada grado -->
-      <ion-item-sliding *ngFor="let grade of grados">
-        
-        <!-- Contenido visible del grado -->
-        <ion-item>
-          <ion-label>
-            <h2>{{ grade.nombre }} - "{{ grade.seccion }}"</h2>
-          </ion-label>
-        </ion-item>
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/tabs/tab1" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="header-title">
+        <h1>Gestionar Grados</h1>
+      </div>
+    </div>
+  </div>
 
-        <!-- Opciones que aparecen al deslizar -->
-        <ion-item-options side="end">
-          <ion-item-option color="primary" (click)="editGrade(grade)">
-            <ion-icon slot="icon-only" [icon]="icons['pencil']"></ion-icon>
-          </ion-item-option>
-          <ion-item-option color="danger" (click)="deleteGrade(grade.id)">
-            <ion-icon slot="icon-only" [icon]="icons['trash']"></ion-icon>
-          </ion-item-option>
-        </ion-item-options>
-        
-      </ion-item-sliding>
-    </ion-list>
+  <!-- Main Container -->
+  <div class="main-container">
+    <div *ngIf="(grados$ | async) as grados; else loading">
+      <div *ngIf="grados.length > 0; else noGrados">
+        <!-- 1. Iteramos para crear una tarjeta por cada grado -->
+        <div class="grade-card" *ngFor="let grade of grados">
+          <div class="grade-header">
+            <h3>{{ grade.nombre }}</h3>
+            <p>Sección "{{ grade.seccion }}"</p>
+          </div>
 
-    <!-- Mensaje si no hay grados creados -->
-    <ng-template #noGrados>
-      <div class="ion-text-center ion-padding">
-        <p>No hay grados creados. Añade uno con el botón de abajo.</p>
+          <!-- 2. Acciones visibles en la parte inferior de la tarjeta -->
+          <div class="card-actions">
+            <ion-button fill="clear" size="small" (click)="editGrade(grade)">
+              <ion-icon slot="start" [icon]="icons['pencil']"></ion-icon>
+              Editar
+            </ion-button>
+            <ion-button fill="clear" size="small" color="danger" (click)="deleteGrade(grade.id)">
+              <ion-icon slot="start" [icon]="icons['trash']"></ion-icon>
+              Eliminar
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Estado vacío mejorado visualmente -->
+      <ng-template #noGrados>
+        <div class="empty-state">
+          <ion-icon name="school-outline"></ion-icon>
+          <h2>No hay grados</h2>
+          <p>Añade un nuevo grado y sección usando el botón de abajo.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Estado de carga -->
+    <ng-template #loading>
+      <div class="spinner-container">
+        <ion-spinner name="crescent"></ion-spinner>
       </div>
     </ng-template>
   </div>
 
-  <!-- Botón flotante para añadir nuevos grados -->
+  <!-- El FAB se mantiene para añadir nuevos grados -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="addNewGrade()">
+    <ion-fab-button (click)="addNewGrade()" class="main-fab">
       <ion-icon [icon]="icons['add']"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
 </ion-content>

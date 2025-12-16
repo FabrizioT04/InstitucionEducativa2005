@@ -1,87 +1,105 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
-    </ion-buttons>
-    <ion-title>{{ pageTitle }}</ion-title>
-  </ion-toolbar>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-  <ion-toolbar>
-    <ion-searchbar 
-      animated="true" 
-      placeholder="Buscar por nombre o correo"
-      [debounce]="250"
-      (ionInput)="handleSearch($event)">
-    </ion-searchbar>
-  </ion-toolbar>
+  <!-- Creative Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/tabs/tab1" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="greeting">
+        <h1>Panel de Administración</h1>
+        <h2>Todos los Usuarios</h2>
+      </div>
+      <div class="avatar-placeholder">
+        <ion-icon name="people" color="light"></ion-icon>
+      </div>
+    </div>
+  </div>
 
-  @if (userRoleFilter === 'estudiante') {
-    <ion-toolbar>
-      <ion-item>
-        <ion-select 
-          label="Filtrar por Grado" 
-          interface="action-sheet"
-          [(ngModel)]="selectedGradeId"
+  <!-- Main Container -->
+  <div class="main-container">
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <ion-searchbar animated="true" placeholder="Buscar por nombre o correo" [debounce]="250"
+        (ionInput)="handleSearch($event)">
+      </ion-searchbar>
+    </div>
+
+    <!-- Filter (Only for Students) -->
+    @if (userRoleFilter === 'estudiante') {
+    <div class="filter-container">
+      <ion-item lines="none">
+        <ion-select label="Filtrar por Grado" interface="action-sheet" [(ngModel)]="selectedGradeId"
           (ionChange)="handleGradeFilterChange($event)">
           <ion-select-option value="all">Mostrar Todos</ion-select-option>
           @if(grados$ | async; as grados) {
-            @for(grado of grados; track grado.id) {
-              <ion-select-option [value]="grado.id">{{ grado.nombre }} - {{ grado.seccion }}</ion-select-option>
-            }
+          @for(grado of grados; track grado.id) {
+          <ion-select-option [value]="grado.id">{{ grado.nombre }} - {{ grado.seccion }}</ion-select-option>
+          }
           }
         </ion-select>
       </ion-item>
-    </ion-toolbar>
-  }
-</ion-header>
-
-<ion-content>
-  @if (isLoading) {
-    <div class="ion-text-center ion-padding">
-      <ion-spinner name="crescent"></ion-spinner>
     </div>
-  } @else {
-    @if (users.length > 0) {
-      <ion-list [inset]="true">
+    }
+
+    <div class="section-wrapper">
+      <div class="section-header">
+        <h3>Lista de Usuarios</h3>
+      </div>
+
+      @if (isLoading) {
+      <div class="spinner-container">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+      } @else {
+      @if (users.length > 0) {
+      <div class="grid-actions">
         @for (user of users; track user.id) {
-          <ion-item-sliding>
-            <ion-item>
-              <ion-avatar slot="start">
-                <img [src]="user.photoURL || 'https://ionicframework.com/docs/img/demos/avatar.svg'" />
-              </ion-avatar>
-              <ion-label>
-                <h2>{{ user.nombreCompleto }}</h2>
-                <p>{{ user.email }}</p>
-              </ion-label>
-              <ion-chip [color]="getRoleColor(user.rol)" slot="end">
-                <ion-label>{{ user.rol | titlecase }}</ion-label>
-              </ion-chip>
-            </ion-item>
-            <ion-item-options side="end">
-              <ion-item-option color="light" (click)="goToEditUser(user.id)">
-                <ion-icon slot="icon-only" [icon]="icons['createOutline']"></ion-icon>
-              </ion-item-option>
-              <ion-item-option color="danger" (click)="deleteUser(user.id, user.nombreCompleto)">
-                <ion-icon slot="icon-only" [icon]="icons['trashOutline']"></ion-icon>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
-        }
-      </ion-list>
-    } @else {
-      <div class="ion-text-center ion-padding">
-        @if (searchTerm) {
-          <p>No se encontraron usuarios que coincidan con "{{ searchTerm }}".</p>
-        } @else {
-          <p>No hay usuarios para mostrar en esta lista.</p>
+        <!-- Action Card -->
+        <div class="action-card" (click)="goToEditUser(user.id)">
+
+
+
+          <div class="card-text">
+            <h4>{{ user.nombreCompleto }}</h4>
+            <p>{{ user.email }}</p>
+            <span class="role-badge" [class]="'role-' + user.rol">{{ user.rol | titlecase }}</span>
+
+            <!-- Actions -->
+            <div class="card-actions-row" (click)="$event.stopPropagation()">
+              <ion-button fill="clear" size="small" (click)="goToEditUser(user.id, $event)">
+                <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" color="danger" size="small"
+                (click)="deleteUser(user.id, user.nombreCompleto, $event)">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
         }
       </div>
-    }
-  }
+      } @else {
+      <div class="empty-state">
+        <ion-icon name="people-outline"></ion-icon>
+        <h2>No se encontraron usuarios</h2>
+        @if (searchTerm) {
+        <p>Prueba con otro término de búsqueda.</p>
+        } @else {
+        <p>Los usuarios registrados aparecerán aquí.</p>
+        }
+      </div>
+      }
+      }
+    </div>
+  </div>
 
+  <!-- FAB -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="goToCreateUser()">
-      <ion-icon [icon]="icons['add']"></ion-icon>
+    <ion-fab-button (click)="goToCreateUser()" class="main-fab">
+      <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
 </ion-content>

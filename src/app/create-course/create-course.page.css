@@ -1,0 +1,102 @@
+/* Modern Modal Styles */
+
+ion-content.modal-content {
+  --background: #f4f6f8;
+}
+
+.modal-handle {
+  width: 40px;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 12px auto;
+}
+
+.modal-header {
+  padding: 0 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.modal-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.form-container {
+  padding: 0 24px 40px 24px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 8px;
+  margin-left: 4px;
+}
+
+.custom-input {
+  --background: #eef2f6;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --min-height: 50px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 24px 0 12px 4px;
+}
+
+.students-list {
+  background: white;
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.student-item {
+  --background: transparent;
+  --border-color: #f0f0f0;
+}
+
+.action-buttons {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.save-btn {
+  --background: #0066ff;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 12px rgba(0, 102, 255, 0.2);
+  height: 50px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cancel-btn {
+  --border-radius: 12px;
+  --color: #4b5563;
+  --border-color: #d1d5db;
+  height: 50px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.spinner-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

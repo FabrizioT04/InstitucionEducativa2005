@@ -1,0 +1,186 @@
+/* Creative & Professional Dashboard Styles (Copied from Tab1) */
+
+ion-content.dashboard-content {
+  --background: #000000;
+}
+
+/* Header Background */
+.header-background {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  padding: 60px 24px 80px 24px;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  box-shadow: 0 10px 30px rgba(212, 216, 222, 0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.greeting h1 {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.greeting h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 4px 0 0 0;
+}
+
+/* Main Container */
+.main-container {
+  padding: 0 20px;
+  margin-top: -60px;
+}
+
+.section-wrapper {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.section-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e9e9e9;
+  margin: 0;
+}
+
+/* Action Cards (Adapted for Courses) */
+.action-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  /* Center vertically */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.996);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.993);
+  margin-bottom: 12px;
+  position: relative;
+  /* For absolute positioning if needed */
+}
+
+.action-card:active {
+  transform: scale(0.98);
+}
+
+.icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  color: white;
+  font-size: 24px;
+  box-shadow: 0 8px 16px rgba(247, 244, 244, 0.1);
+  flex-shrink: 0;
+  /* Prevent shrinking */
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.gradient-cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.card-text {
+  flex: 1;
+}
+
+.card-text h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 4px 0;
+}
+
+.card-text p {
+  font-size: 13px;
+  color: #000000;
+  margin: 0;
+}
+
+.arrow-icon {
+  margin-left: auto;
+  color: #d1d5db;
+  font-size: 20px;
+}
+
+/* Card Actions (Admin buttons) */
+.card-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+  width: 100%;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: var(--ion-color-medium);
+  text-align: center;
+}
+
+.empty-state ion-icon {
+  font-size: 60px;
+  margin-bottom: 16px;
+  color: #d1d5db;
+}
+
+.empty-state h2 {
+  font-weight: 600;
+  font-size: 18px;
+  color: #374151;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+/* FAB */
+.main-fab {
+  --background: #2563eb;
+  --color: white;
+  --box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+}

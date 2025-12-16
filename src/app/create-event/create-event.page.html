@@ -7,8 +7,12 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-list>
+<ion-content>
+  <!-- 1. Grupo para la información del evento -->
+  <ion-list [inset]="true">
+    <ion-list-header>
+      <ion-label>Información del Evento</ion-label>
+    </ion-list-header>
     <ion-item>
       <ion-input label="Título del Evento" labelPlacement="floating" [(ngModel)]="evento.titulo" type="text" required></ion-input>
     </ion-item>
@@ -17,32 +21,39 @@
     </ion-item>
   </ion-list>
 
-  <ion-list-header>
-    <ion-label>Fechas del Evento</ion-label>
-  </ion-list-header>
-  <ion-item>
-    <ion-datetime-button datetime="datetime-inicio"></ion-datetime-button>
-    <ion-modal [keepContentsMounted]="true">
-      <ng-template>
-        <ion-datetime id="datetime-inicio" [(ngModel)]="evento.fechaInicio" presentation="date-time"></ion-datetime>
-      </ng-template>
-    </ion-modal>
-    <ion-label slot="start">Inicio</ion-label>
-  </ion-item>
-  <ion-item>
-    <ion-datetime-button datetime="datetime-fin"></ion-datetime-button>
-    <ion-modal [keepContentsMounted]="true">
-      <ng-template>
-        <ion-datetime id="datetime-fin" [(ngModel)]="evento.fechaFin" presentation="date-time"></ion-datetime>
-      </ng-template>
-    </ion-modal>
-    <!-- ¡ESTA ES LA LÍNEA CRÍTICA! -->
-    <ion-label slot="start">Fin</ion-label>
-  </ion-item>
+  <!-- 2. Grupo para las fechas del evento -->
+  <ion-list [inset]="true">
+    <ion-list-header>
+      <ion-label>Fechas del Evento</ion-label>
+    </ion-list-header>
+    <ion-item>
+      <ion-label>Inicio</ion-label>
+      <ion-datetime-button datetime="datetime-inicio"></ion-datetime-button>
+    </ion-item>
+    <ion-item>
+      <ion-label>Fin</ion-label>
+      <ion-datetime-button datetime="datetime-fin"></ion-datetime-button>
+    </ion-item>
+  </ion-list>
 
-  <ion-button expand="block" (click)="guardarEvento()" [disabled]="guardando" class="ion-margin-top">
-    <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-    <span *ngIf="!guardando">Guardar Evento</span>
-  </ion-button>
+  <!-- 3. Modales para los selectores de fecha/hora -->
+  <ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime id="datetime-inicio" [(ngModel)]="evento.fechaInicio" presentation="date-time"></ion-datetime>
+    </ng-template>
+  </ion-modal>
+  <ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime id="datetime-fin" [(ngModel)]="evento.fechaFin" presentation="date-time"></ion-datetime>
+    </ng-template>
+  </ion-modal>
+
+  <!-- 4. Botón de acción con padding -->
+  <div class="ion-padding">
+    <ion-button expand="block" (click)="guardarEvento()" [disabled]="guardando">
+      <span *ngIf="!guardando">Guardar Evento</span>
+      <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+    </ion-button>
+  </div>
+
 </ion-content>
-

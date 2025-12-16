@@ -1,0 +1,127 @@
+/* Dark Theme Grade Management Styles */
+
+ion-content.dashboard-content {
+  --background: #121212;
+  /* Dark Background */
+}
+
+/* Header Background */
+.header-background {
+  background: #3b82f6;
+  /* Solid Blue */
+  padding: 60px 24px 80px 24px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: none;
+  /* Flat design */
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+.header-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0 16px;
+}
+
+/* Main Container */
+.main-container {
+  padding: 0 16px;
+  margin-top: -60px;
+  /* Overlap */
+}
+
+/* Grade Cards */
+.grade-card {
+  background: #ffffff;
+  /* Dark Card */
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+}
+
+.grade-header {
+  margin-bottom: 12px;
+}
+
+.grade-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 4px 0;
+}
+
+.grade-header p {
+  font-size: 14px;
+  color: #000000;
+  /* Grey text */
+  margin: 0;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #333;
+  padding-top: 8px;
+}
+
+ion-button {
+  --color: #3b82f6;
+}
+
+ion-button[color="danger"] {
+  --color: #ef4444;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.empty-state ion-icon {
+  font-size: 60px;
+  margin-bottom: 16px;
+  color: #4b5563;
+}
+
+.empty-state h2 {
+  font-weight: 600;
+  font-size: 18px;
+  color: #e5e7eb;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* Spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+ion-spinner {
+  --color: #3b82f6;
+}
+
+/* FAB */
+.main-fab {
+  --background: #3b82f6;
+  --color: white;
+  --box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}

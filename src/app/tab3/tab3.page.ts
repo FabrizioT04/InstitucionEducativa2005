@@ -1,12 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController, ActionSheetController, LoadingController, ToastController } from '@ionic/angular';
 import { Auth, onAuthStateChanged, signOut, User } from '@angular/fire/auth';
 import { Firestore, doc, getDoc, updateDoc } from '@angular/fire/firestore';
 import { Storage, ref, uploadString, getDownloadURL } from '@angular/fire/storage';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { camera, logOutOutline } from 'ionicons/icons';
+import { camera, logOutOutline, ribbonOutline, checkmarkDoneOutline } from 'ionicons/icons';
 
 // Interfaz para tipar los datos del usuario
 interface UserProfile {
@@ -19,9 +19,9 @@ interface UserProfile {
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',
-  styleUrls: ['tab3.page.scss'],
+  styleUrls: ['tab3.page.css'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [IonicModule, CommonModule, FormsModule, TitleCasePipe],
 })
 export class Tab3Page implements OnInit {
   public currentUser: User | null = null;
@@ -42,42 +42,53 @@ export class Tab3Page implements OnInit {
   ngOnInit() {
     onAuthStateChanged(this.auth, (user) => {
       if (user) {
-        console.log('Paso 1: Usuario autenticado. UID:', user.uid);
         this.currentUser = user;
         this.loadUserProfile(user.uid);
       } else {
-        console.log('Usuario no autenticado.');
         this.currentUser = null;
         this.userProfile = null;
         this.cargando = false;
       }
     });
   }
-  
+
   get icons() {
-    return { camera, logOutOutline };
+    // 1. AÑADIMOS LOS NUEVOS ICONOS
+    return { camera, logOutOutline, ribbonOutline, checkmarkDoneOutline };
   }
 
   async loadUserProfile(uid: string) {
     this.cargando = true;
-    console.log(`Paso 2: Buscando perfil en Firestore para el UID: ${uid}`);
     try {
       const userDocRef = doc(this.firestore, `usuarios/${uid}`);
       const docSnap = await getDoc(userDocRef);
 
       if (docSnap.exists()) {
-        console.log('Paso 3: ¡Documento encontrado!', docSnap.data());
         this.userProfile = docSnap.data() as UserProfile;
       } else {
-        console.warn(`Paso 3: ADVERTENCIA - No se encontró ningún documento en la colección 'usuarios' con el ID: ${uid}`);
         this.userProfile = null;
       }
     } catch (error) {
-      console.error("Paso 3: ERROR - Ocurrió un error al cargar el perfil:", error);
+      console.error("Error al cargar el perfil:", error);
       this.userProfile = null;
     } finally {
       this.cargando = false;
     }
+  }
+
+  // 2. NUEVA FUNCIÓN PARA OBTENER EL COLOR DEL ROL
+  getRoleColor(role: string): string {
+    switch (role.toLowerCase()) {
+      case 'administrador': return 'danger';
+      case 'profesor': return 'secondary';
+      case 'alumno': return 'primary';
+      default: return 'medium';
+    }
+  }
+
+  // 3. NUEVA FUNCIÓN PARA LA NAVEGACIÓN
+  goTo(path: string) {
+    this.navCtrl.navigateForward(path);
   }
 
   // --- FUNCIONALIDAD PARA CAMBIAR FOTO ---
@@ -109,18 +120,18 @@ export class Tab3Page implements OnInit {
 
         const userId = this.currentUser.uid;
         const storageRef = ref(this.storage, `profile_pictures/${userId}`);
-        
+
         await uploadString(storageRef, image.dataUrl, 'data_url');
-        
+
         const downloadUrl = await getDownloadURL(storageRef);
-        
+
         const userDocRef = doc(this.firestore, `usuarios/${userId}`);
         await updateDoc(userDocRef, { photoURL: downloadUrl });
 
         if (this.userProfile) {
           this.userProfile.photoURL = downloadUrl;
         }
-        
+
         loading.dismiss();
         this.presentToast('Foto de perfil actualizada con éxito.', 'success');
       }
@@ -146,3 +157,4 @@ export class Tab3Page implements OnInit {
     toast.present();
   }
 }
+

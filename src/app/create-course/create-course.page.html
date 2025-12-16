@@ -1,60 +1,73 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab2"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Crear Nueva Clase</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="modal-content">
+  <div class="modal-handle"></div>
 
-<ion-content class="ion-padding">
-  <ion-spinner *ngIf="cargando" name="crescent" class="spinner-center"></ion-spinner>
+  <div class="modal-header">
+    <h1>Añadir Nuevo Curso</h1>
+  </div>
 
-  <div *ngIf="!cargando">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Nombre del Curso" labelPlacement="floating" [(ngModel)]="curso.nombre" type="text" required></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input label="Área Académica" labelPlacement="floating" [(ngModel)]="curso.area" type="text"></ion-input>
-      </ion-item>
-    </ion-list>
+  <div class="form-container">
+    <ion-spinner *ngIf="cargando" name="crescent" class="spinner-center"></ion-spinner>
 
-    <ion-list-header>
-      <ion-label>Configuración de la Clase</ion-label>
-    </ion-list-header>
-    <ion-list [inset]="true">
-      <ion-item>
-        <ion-select label="Asignar Grado" labelPlacement="floating" [(ngModel)]="asignacion.gradoId" required>
-          <ion-select-option *ngFor="let grado of grados" [value]="grado.id">
-            {{ grado.nombre }} - {{ grado.seccion }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item>
-        <ion-select label="Asignar Profesor" labelPlacement="floating" [(ngModel)]="asignacion.profesorId" required>
-          <ion-select-option *ngFor="let profesor of profesores" [value]="profesor.id">
-            {{ profesor.nombreCompleto }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-    </ion-list>
+    <div *ngIf="!cargando">
+      <!-- Basic Info -->
+      <div class="input-group">
+        <label>Nombre del curso</label>
+        <ion-item class="custom-input" lines="none">
+          <ion-input placeholder="Ej: Cálculo Avanzado" [(ngModel)]="curso.nombre" type="text" required></ion-input>
+        </ion-item>
+      </div>
 
-    <ion-list-header>
-      <ion-label>Inscribir Estudiantes</ion-label>
-    </ion-list-header>
-    <ion-list [inset]="true">
-      <ion-item *ngFor="let estudiante of estudiantes">
-        <ion-checkbox slot="start" [(ngModel)]="estudiante.inscrito"></ion-checkbox>
-        <ion-label>{{ estudiante.nombreCompleto }}</ion-label>
-      </ion-item>
-    </ion-list>
+      <div class="input-group">
+        <label>Área académica</label>
+        <ion-item class="custom-input" lines="none">
+          <ion-input placeholder="Ej: Matemáticas" [(ngModel)]="curso.area" type="text"></ion-input>
+        </ion-item>
+      </div>
 
-    <ion-button expand="block" (click)="guardarCursoCompleto()" [disabled]="guardando" class="ion-margin-top">
-      <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
-      <span *ngIf="!guardando">Guardar y Configurar Clase</span>
-    </ion-button>
+      <!-- Configuration -->
+      <div class="section-title">Configuración</div>
+
+      <div class="input-group">
+        <label>Asignar Grado</label>
+        <ion-item class="custom-input" lines="none">
+          <ion-select placeholder="Seleccionar Grado" [(ngModel)]="asignacion.gradoId" interface="popover">
+            <ion-select-option *ngFor="let grado of grados" [value]="grado.id">
+              {{ grado.nombre }} - {{ grado.seccion }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <div class="input-group">
+        <label>Asignar Profesor</label>
+        <ion-item class="custom-input" lines="none">
+          <ion-select placeholder="Seleccionar Profesor" [(ngModel)]="asignacion.profesorId" interface="popover">
+            <ion-select-option *ngFor="let profesor of profesores" [value]="profesor.id">
+              {{ profesor.nombreCompleto }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <!-- Students -->
+      <div class="section-title">Estudiantes</div>
+      <div class="students-list">
+        <ion-item *ngFor="let estudiante of estudiantes" lines="none" class="student-item">
+          <ion-checkbox slot="start" [(ngModel)]="estudiante.inscrito"></ion-checkbox>
+          <ion-label>{{ estudiante.nombreCompleto }}</ion-label>
+        </ion-item>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-buttons">
+        <ion-button expand="block" fill="outline" class="cancel-btn" routerLink="/tabs/tab2">
+          CANCELAR
+        </ion-button>
+        <ion-button expand="block" class="save-btn" (click)="guardarCursoCompleto()" [disabled]="guardando">
+          <span *ngIf="!guardando">GUARDAR</span>
+          <ion-spinner *ngIf="guardando" name="crescent"></ion-spinner>
+        </ion-button>
+      </div>
+    </div>
   </div>
 </ion-content>
-
-

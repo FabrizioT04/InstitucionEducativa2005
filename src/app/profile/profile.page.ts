@@ -10,7 +10,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
-  styleUrls: ['./profile.page.scss'],
+  styleUrls: ['./profile.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })

@@ -6,7 +6,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/stan
 @Component({
   selector: 'app-course-list',
   templateUrl: './course-list.page.html',
-  styleUrls: ['./course-list.page.scss'],
+  styleUrls: ['./course-list.page.css'],
   standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
@@ -18,3 +18,4 @@ export class CourseListPage implements OnInit {
   }
 
 }
+

@@ -20,7 +20,7 @@ interface HorarioItem {
 @Component({
   selector: 'app-manage-schedule',
   templateUrl: './manage-schedule.page.html',
-  styleUrls: ['./manage-schedule.page.scss'],
+  styleUrls: ['./manage-schedule.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule],
 })
@@ -144,3 +144,4 @@ export class ManageSchedulePage implements OnInit {
     await alert.present();
   }
 }
+

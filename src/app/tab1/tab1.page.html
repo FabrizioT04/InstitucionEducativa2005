@@ -1,110 +1,128 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-title>Inicio</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Inicio</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  @if (userRole === 'administrador') {
-    <ion-list [inset]="true">
-      <ion-list-header><ion-label>Gestión de Usuarios</ion-label></ion-list-header>
-      <ion-item button="true" detail="true" (click)="goTo('/user-list')">
-        <ion-icon [icon]="icons['peopleCircleOutline']" slot="start"></ion-icon>
-        <ion-label>Gestionar Todos los Usuarios</ion-label>
-      </ion-item>
-      
-      <ion-list-header><ion-label>Gestión Académica</ion-label></ion-list-header>
-      <ion-item button="true" detail="true" (click)="goTo('/manage-courses')">
-        <ion-icon [icon]="icons['libraryOutline']" slot="start"></ion-icon>
-        <ion-label>Gestionar Cursos</ion-label>
-      </ion-item>
-      <ion-item button="true" detail="true" (click)="goTo('/grade-management')">
-        <ion-icon [icon]="icons['schoolOutline']" slot="start"></ion-icon>
-        <ion-label>Gestionar Grados y Secciones</ion-label>
-      </ion-item>
-    </ion-list>
-  }
-
-  <ion-list-header class="ion-padding-start ion-padding-end">
-    <ion-label>Calendario de Eventos</ion-label>
-    @if (userRole === 'administrador') {
-      <ion-button (click)="goToCreateEvent()" fill="clear" title="Crear nuevo evento">
-        <ion-icon slot="icon-only" [icon]="icons['addCircleOutline']"></ion-icon>
-      </ion-button>
-    }
-  </ion-list-header>
-  <ion-card>
-    <ion-card-content>
-      <ion-datetime presentation="date" [value]="fechaSeleccionada" (ionChange)="onDateChange($event)"></ion-datetime>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-list [inset]="true">
-    @if (eventosDelDia.length > 0) {
-      @for (evento of eventosDelDia; track evento.id) {
-        <ion-item>
-          <ion-icon [icon]="icons['calendarOutline']" slot="start" color="primary"></ion-icon>
-          <ion-label>
-            <h2>{{ evento.titulo }}</h2>
-            <p>{{ evento.descripcion }}</p>
-          </ion-label>
-        </ion-item>
-      }
-    } @else {
-      <ion-item lines="none"><ion-label class="ion-text-center">No hay eventos programados para este día.</ion-label></ion-item>
-    }
-  </ion-list>
-
-  <ion-list-header class="ion-padding-start ion-padding-end">
-    <ion-label>Últimos Comunicados</ion-label>
-  </ion-list-header>
-
-  @if (comunicados.length > 0) {
-    @for (comunicado of comunicados; track comunicado.id) {
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>{{ comunicado.titulo }}</ion-card-title>
-          @if(comunicado.fecha) {
-            <ion-card-subtitle>{{ comunicado.fecha | date:'fullDate':'':'es-PE' }}</ion-card-subtitle>
-          }
-        </ion-card-header>
-        <ion-card-content>{{ comunicado.mensaje }}</ion-card-content>
-        @if (userRole === 'administrador') {
-          <ion-footer class="ion-no-border">
-            <ion-toolbar>
-              <ion-buttons slot="end">
-                <ion-button (click)="editComunicado(comunicado.id, $event)">
-                  <ion-icon slot="icon-only" [icon]="icons['createOutline']"></ion-icon>
-                </ion-button>
-                <ion-button (click)="deleteComunicado(comunicado.id, $event)" color="danger">
-                  <ion-icon slot="icon-only" [icon]="icons['trashOutline']"></ion-icon>
-                </ion-button>
-              </ion-buttons>
-            </ion-toolbar>
-          </ion-footer>
-        }
-      </ion-card>
-    }
-  } @else {
-    <div class="ion-text-center ion-padding">
-      <p>No hay comunicados para mostrar.</p>
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <div class="greeting">
+        <h1>Hola,</h1>
+        <h2>Bienvenido de nuevo</h2>
+      </div>
+      <div class="user-avatar">
+        <!-- Placeholder o imagen real -->
+        <div class="avatar-placeholder">
+          <ion-icon name="person" color="light"></ion-icon>
+        </div>
+      </div>
     </div>
-  }
+  </div>
 
-  @if (userRole === 'administrador') {
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button (click)="goToCreateComunicado()">
-        <ion-icon [icon]="icons['add']"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
-  }
+  <!-- Main Container (Overlaps Header) -->
+  <div class="main-container">
+
+    <!-- 1. CALENDARIO WIDGET -->
+    <div class="section-wrapper">
+      <div class="section-header">
+        <h3>Calendario</h3>
+        <ion-button fill="clear" size="small" class="add-btn" *ngIf="userRole === 'administrador'"
+          (click)="goToCreateEvent()">
+          <ion-icon name="add" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="calendar-widget">
+        <ion-datetime presentation="date" [value]="fechaSeleccionada" (ionChange)="onDateChange($event)"
+          class="custom-datetime" locale="es-ES"></ion-datetime>
+      </div>
+    </div>
+
+    <!-- 2. GESTIÓN (Solo Admin) -->
+    <div class="section-wrapper" *ngIf="userRole === 'administrador'">
+      <div class="section-header">
+        <h3>Gestión</h3>
+      </div>
+
+      <div class="grid-actions">
+        <!-- Usuarios -->
+        <div class="action-card" (click)="goTo('/user-list')">
+          <div class="icon-box gradient-blue">
+            <ion-icon name="people"></ion-icon>
+          </div>
+          <div class="card-text">
+            <h4>Usuarios</h4>
+            <p>Gestionar todo</p>
+          </div>
+          <ion-icon name="chevron-forward" class="arrow-icon"></ion-icon>
+        </div>
+
+        <!-- Cursos -->
+        <div class="action-card" (click)="goTo('/manage-courses')">
+          <div class="icon-box gradient-purple">
+            <ion-icon name="school"></ion-icon>
+          </div>
+          <div class="card-text">
+            <h4>Cursos</h4>
+            <p>Académico</p>
+          </div>
+          <ion-icon name="chevron-forward" class="arrow-icon"></ion-icon>
+        </div>
+
+        <!-- Grados -->
+        <div class="action-card" (click)="goTo('/grade-management')">
+          <div class="icon-box gradient-cyan">
+            <ion-icon name="book"></ion-icon>
+          </div>
+          <div class="card-text">
+            <h4>Grados</h4>
+            <p>Secciones</p>
+          </div>
+          <ion-icon name="chevron-forward" class="arrow-icon"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. COMUNICADOS -->
+    <div class="section-wrapper">
+      <div class="section-header">
+        <h3>Comunicados</h3>
+      </div>
+
+      @if (comunicados.length > 0) {
+      @for (comunicado of comunicados; track comunicado.id) {
+      <div class="comunicado-card">
+        <div class="comunicado-left-border"></div>
+        <div class="comunicado-content">
+          <div class="comunicado-top">
+            <h4>{{ comunicado.titulo }}</h4>
+            <span class="date" *ngIf="comunicado.fecha">{{ comunicado.fecha | date:'d MMM':'':'es-PE' }}</span>
+          </div>
+          <p>{{ comunicado.mensaje }}</p>
+
+          @if (userRole === 'administrador') {
+          <div class="card-actions">
+            <ion-button fill="clear" size="small" (click)="editComunicado(comunicado.id, $event)">
+              <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button fill="clear" size="small" color="danger" (click)="deleteComunicado(comunicado.id, $event)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+          }
+        </div>
+      </div>
+      }
+      } @else {
+      <div class="empty-state">
+        <p>No hay novedades hoy.</p>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- FAB Flotante -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="userRole === 'administrador'">
+    <ion-fab-button (click)="goToCreateComunicado()" class="main-fab">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
 </ion-content>
-
-

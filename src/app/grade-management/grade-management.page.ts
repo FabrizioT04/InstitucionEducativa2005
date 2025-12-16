@@ -18,7 +18,7 @@ interface Grade {
 @Component({
   selector: 'app-grade-management',
   templateUrl: './grade-management.page.html',
-  styleUrls: ['./grade-management.page.scss'],
+  styleUrls: ['./grade-management.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })

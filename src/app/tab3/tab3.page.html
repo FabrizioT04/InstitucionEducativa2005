@@ -1,54 +1,70 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>
-      Perfil de Usuario
-    </ion-title>
+    <ion-title>Perfil de Usuario</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Perfil</ion-title>
-    </ion-toolbar>
-  </ion-header>
 
   @if (cargando) {
-    <div class="ion-text-center ion-padding">
+    <div class="spinner-container">
       <ion-spinner name="crescent"></ion-spinner>
     </div>
   }
 
   @if (!cargando && userProfile) {
-    <div class="profile-container">
-      <!-- Contenedor del avatar para posicionar el botón -->
-      <div class="avatar-wrapper">
-        <ion-avatar class="profile-avatar" (click)="changeProfilePicture()">
-          <img [src]="userProfile.photoURL || 'https://ionicframework.com/docs/img/demos/avatar.svg'" alt="Foto de perfil">
+    <!-- 1. Encabezado de perfil visualmente más atractivo -->
+    <div class="profile-header">
+      <div class="avatar-container">
+        <ion-avatar (click)="changeProfilePicture()">
+          <img [src]="userProfile.photoURL || 'assets/icon/favicon.png'" alt="Foto de perfil">
         </ion-avatar>
         <ion-fab-button class="camera-fab" size="small" (click)="changeProfilePicture()">
           <ion-icon [icon]="icons['camera']"></ion-icon>
         </ion-fab-button>
       </div>
-
-      <h2>{{ userProfile.nombreCompleto }}</h2>
-      <p>{{ userProfile.email }}</p>
-      <ion-chip [color]="userProfile.rol === 'administrador' ? 'danger' : (userProfile.rol === 'profesor' ? 'secondary' : 'primary')">
+      <h1 class="profile-name">{{ userProfile.nombreCompleto }}</h1>
+      <p class="profile-email">{{ userProfile.email }}</p>
+      <ion-chip [color]="getRoleColor(userProfile.rol)">
         <ion-label>{{ userProfile.rol | titlecase }}</ion-label>
       </ion-chip>
     </div>
 
+    <!-- 2. Lista de opciones para el usuario (rol específico) -->
     <ion-list [inset]="true">
-      <ion-item button="true" (click)="logout()" color="danger" lines="none">
-        <ion-icon [icon]="icons['logOutOutline']" slot="start"></ion-icon>
-        <ion-label>Cerrar Sesión</ion-label>
+      <ion-list-header>
+        <ion-label>Mi Cuenta</ion-label>
+      </ion-list-header>
+
+      @if (userProfile.rol === 'alumno') {
+        <ion-item button="true" detail="true" (click)="goTo('/my-grades')">
+          <ion-icon name="ribbon-outline" slot="start"></ion-icon>
+          <ion-label>Mis Calificaciones</ion-label>
+        </ion-item>
+        <ion-item button="true" detail="true" (click)="goTo('/attendance-history')">
+          <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+          <ion-label>Historial de Asistencia</ion-label>
+        </ion-item>
+      }
+    </ion-list>
+
+    <!-- 3. Lista para acciones generales de la cuenta -->
+    <ion-list [inset]="true">
+      <ion-list-header>
+        <ion-label>Ajustes</ion-label>
+      </ion-list-header>
+      <ion-item button="true" (click)="logout()" lines="none">
+        <ion-icon [icon]="icons['logOutOutline']" slot="start" color="danger"></ion-icon>
+        <ion-label color="danger">Cerrar Sesión</ion-label>
       </ion-item>
     </ion-list>
-  }
 
-  @if (!cargando && !userProfile) {
-    <div class="ion-text-center ion-padding">
+  } @else if (!cargando) {
+    <div class="empty-state">
+      <ion-icon name="person-circle-outline"></ion-icon>
+      <h2>Perfil no disponible</h2>
       <p>No se pudo cargar la información del perfil.</p>
     </div>
   }
+
 </ion-content>

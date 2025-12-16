@@ -1,14 +1,21 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/tab2"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Detalles de la Clase</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content" [fullscreen]="true">
 
-<ion-content>
-  @if (claseDetalle$ | async; as detalle) {
+  <!-- Flat Header Background -->
+  <div class="header-background">
+    <div class="header-content">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/tabs/tab2" color="light"></ion-back-button>
+      </ion-buttons>
+      <div class="header-title">
+        <h1>Detalles de la Clase</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- 1. Tarjeta de Información (Existente) -->
+    @if (claseDetalles$ | async; as detalle) {
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ detalle.nombreCurso }}</ion-card-title>
@@ -16,48 +23,127 @@
       </ion-card-header>
       <ion-card-content>
         <ion-item lines="none">
-          <ion-icon [icon]="icons['personCircleOutline']" slot="start"></ion-icon>
+          <ion-icon name="person-circle-outline" slot="start"></ion-icon>
           <ion-label>
-            <h3>Profesor</h3>
-            <p>{{ detalle.nombreProfesor }}</p>
+            <p>Profesor</p>
+            <h3>{{ detalle.nombreProfesor }}</h3>
           </ion-label>
         </ion-item>
       </ion-card-content>
     </ion-card>
+    }
 
-    <!-- ========= OPCIONES PARA EL PROFESOR DE ESTA CLASE ========= -->
+    <!-- 2. Opciones de Administrador (Existente) -->
+    @if (userRole === 'administrador') {
+    <ion-list-header>Gestión Administrativa</ion-list-header>
+    <ion-list [inset]="true">
+      <!-- Opciones de Edición/Eliminación de la Asignación -->
+      <ion-item button="true" (click)="goToEditAssignment()" [disabled]="true">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        <ion-label>Editar Asignación</ion-label>
+      </ion-item>
+      <ion-item button="true" [disabled]="true">
+        <ion-icon name="trash-outline" slot="start" color="danger"></ion-icon>
+        <ion-label color="danger">Eliminar Asignación</ion-label>
+      </ion-item>
+    </ion-list>
+    }
+
+    <!-- 3. Opciones de Profesor (Existente) -->
     @if (userRole === 'profesor' && esProfesorDeEstaClase) {
-      <ion-list-header>Acciones del Profesor</ion-list-header>
-      <ion-list [inset]="true">
-        <ion-item button="true" (click)="goToManageAttendance()">
-          <ion-icon [icon]="icons['checkmarkDoneOutline']" slot="start"></ion-icon>
-          <ion-label>Tomar Asistencia</ion-label>
-        </ion-item>
-        <ion-item button="true" (click)="goToManageGrades()">
-          <ion-icon [icon]="icons['createOutline']" slot="start"></ion-icon>
-          <ion-label>Gestionar Calificaciones</ion-label>
-        </ion-item>
-      </ion-list>
+    <ion-list-header>Acciones del Profesor</ion-list-header>
+    <ion-list [inset]="true">
+      <ion-item button="true" (click)="goToManageAttendance()">
+        <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+        <ion-label>Tomar Asistencia</ion-label>
+      </ion-item>
+      <ion-item button="true" (click)="goToManageGrades()">
+        <ion-icon name="create-outline" slot="start"></ion-icon>
+        <ion-label>Gestionar Calificaciones</ion-label>
+      </ion-item>
+    </ion-list>
     }
 
-    <!-- ========= OPCIONES PARA EL ESTUDIANTE INSCRITO ========= -->
+    <!-- 4. Opciones de Estudiante (¡¡MODIFICADO!!) -->
     @if (userRole === 'estudiante' && esEstudianteInscrito) {
-      <ion-list-header>Mi Progreso</ion-list-header>
-      <ion-list [inset]="true">
-        <ion-item button="true" (click)="goToMyGrades()">
-          <ion-icon [icon]="icons['statsChartOutline']" slot="start"></ion-icon>
-          <ion-label>Ver mis Calificaciones</ion-label>
-        </ion-item>
-        <ion-item button="true" (click)="goToMyAttendance()">
-          <ion-icon [icon]="icons['schoolOutline']" slot="start"></ion-icon>
-          <ion-label>Ver mis Asistencias</ion-label>
-        </ion-item>
-      </ion-list>
-    }
+    <ion-list-header>Mi Progreso</ion-list-header>
 
-  } @else {
+    <!-- Botones de Navegación (Existentes) -->
+    <ion-list [inset]="true">
+      <ion-item button="true" (click)="goToMyGrades()">
+        <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+        <ion-label>Ver todas mis Calificaciones</ion-label>
+      </ion-item>
+      <ion-item button="true" (click)="goToMyAttendance()">
+        <ion-icon name="school-outline" slot="start"></ion-icon>
+        <ion-label>Ver todas mis Asistencias</ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!-- ¡¡INICIO DE NUEVA LÓGICA!! -->
+
+    <!-- Sección Mis Calificaciones -->
+    <ion-list-header>Calificaciones Recientes</ion-list-header>
+    @if (cargandoCalificaciones) {
+    <ion-item class="ion-text-center">
+      <ion-spinner name="crescent"></ion-spinner>
+    </ion-item>
+    }
+    <ion-list [inset]="true">
+      @for (calificacion of (misCalificaciones$ | async); track calificacion.id) {
+      <ion-item>
+        <ion-label>
+          <p>{{ calificacion.descripcion || 'Evaluación' }}</p>
+          <h3>{{ calificacion.nota || 'N/A' }}</h3>
+        </ion-label>
+        @if(calificacion.fecha) {
+        <ion-note slot="end">{{ formatTimestamp(calificacion.fecha) }}</ion-note>
+        }
+      </ion-item>
+      } @empty { @if (!cargandoCalificaciones) {
+      <ion-item lines="none">
+        <ion-label class="ion-text-center ion-padding-vertical">No hay calificaciones registradas.</ion-label>
+      </ion-item>
+      } }
+    </ion-list>
+
+    <!-- Sección Mis Asistencias -->
+    <ion-list-header>Asistencias Recientes</ion-list-header>
+    @if (cargandoAsistencias) {
+    <ion-item class="ion-text-center">
+      <ion-spinner name="crescent"></ion-spinner>
+    </ion-item>
+    }
+    <ion-list [inset]="true">
+      @for (asistencia of (misAsistencias$ | async); track asistencia.id) {
+      <ion-item>
+        <ion-label>{{ formatDate(asistencia.fecha) }}</ion-label>
+        <ion-badge
+          [color]="asistencia.estado === 'PRESENTE' ? 'success' : (asistencia.estado === 'AUSENTE' ? 'danger' : 'warning')"
+          slot="end">
+          {{ asistencia.estado }}
+        </ion-badge>
+      </ion-item>
+      } @empty { @if (!cargandoAsistencias) {
+      <ion-item lines="none">
+        <ion-label class="ion-text-center ion-padding-vertical">No hay asistencias registradas.</ion-label>
+      </ion-item>
+      } }
+    </ion-list>
+
+    <!-- ¡¡FIN DE NUEVA LÓGICA!! -->
+    } @else if (userRole === 'estudiante' && !esEstudianteInscrito) {
+    <!-- Mostrar si no está inscrito -->
+    <ion-list [inset]="true">
+      <ion-item lines="none">
+        <ion-label class="ion-text-center ion-padding-vertical">No estás inscrito en esta clase.</ion-label>
+      </ion-item>
+    </ion-list>
+    } @else if (!userRole) {
+    <!-- Estado de Carga Global (Spinner) -->
     <div class="ion-text-center ion-padding">
       <ion-spinner name="crescent"></ion-spinner>
     </div>
-  }
+    }
+  </div>
 </ion-content>

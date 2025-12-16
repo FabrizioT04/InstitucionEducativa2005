@@ -1,0 +1,94 @@
+/* Dark Theme Edit Communication Styles */
+
+ion-content {
+  --background: #121212;
+  /* Dark Background */
+}
+
+/* Header Background */
+.header-background {
+  background: #3b82f6;
+  /* Solid Blue */
+  padding: 60px 24px 80px 24px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: none;
+  /* Flat design */
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+.header-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0 16px;
+}
+
+/* Main Container */
+.main-container {
+  padding: 0 16px;
+  margin-top: -60px;
+  /* Overlap */
+}
+
+/* Form Styles */
+ion-list {
+  background: transparent;
+  padding: 0;
+  margin-bottom: 24px;
+}
+
+ion-list-header {
+  padding-left: 4px;
+  margin-bottom: 8px;
+}
+
+ion-list-header ion-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+ion-item {
+  --background: #1e1e1e;
+  /* Dark Card */
+  --color: #ffffff;
+  --border-color: #333333;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+ion-input,
+ion-textarea {
+  --color: #ffffff;
+  --placeholder-color: #9ca3af;
+}
+
+/* Buttons */
+ion-button {
+  --background: #3b82f6;
+  --color: #ffffff;
+  --border-radius: 12px;
+  font-weight: 600;
+  margin: 0;
+  height: 48px;
+}
+
+/* Spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80%;
+}
+
+ion-spinner {
+  --color: #3b82f6;
+}

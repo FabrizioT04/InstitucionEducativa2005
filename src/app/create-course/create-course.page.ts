@@ -18,7 +18,7 @@ interface StudentCheck extends UserData {
 @Component({
   selector: 'app-create-course',
   templateUrl: './create-course.page.html',
-  styleUrls: ['./create-course.page.scss'],
+  styleUrls: ['./create-course.page.css'],
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
@@ -130,6 +130,7 @@ export class CreateCoursePage implements OnInit {
     toast.present();
   }
 }
+
 
 
 
