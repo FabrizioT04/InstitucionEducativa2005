@@ -36,7 +36,7 @@
         <ion-label>Mi Cuenta</ion-label>
       </ion-list-header>
 
-      @if (userProfile.rol === 'alumno') {
+      @if (userProfile.rol === 'estudiante') {
         <ion-item button="true" detail="true" (click)="goTo('/my-grades')">
           <ion-icon name="ribbon-outline" slot="start"></ion-icon>
           <ion-label>Mis Calificaciones</ion-label>

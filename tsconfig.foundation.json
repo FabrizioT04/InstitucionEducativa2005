@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/**/*.d.ts",
+    "src/app/core/**/*.spec.ts",
+    "src/app/guards/**/*.spec.ts",
+    "src/app/shared/**/*.spec.ts",
+    "src/app/manage-grades/*.spec.ts",
+    "src/app/my-grades/*.spec.ts",
+    "src/app/course-detail/*.spec.ts",
+    "src/app/manage-attendance/*.spec.ts",
+    "src/app/tab2/*.spec.ts",
+    "src/app/tab3/*.spec.ts",
+    "src/app/app.routes.spec.ts"
+  ]
+}

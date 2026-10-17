@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -49,12 +49,10 @@ export class EditComunicadoPage implements OnInit {
   cargando = true;
   guardando = false;
 
-  constructor(
-    private route: ActivatedRoute,
-    private firestore: Firestore,
-    private navController: NavController,
-    private toastController: ToastController
-  ) { }
+  private readonly route = inject(ActivatedRoute);
+  private readonly firestore = inject(Firestore);
+  private readonly navController = inject(NavController);
+  private readonly toastController = inject(ToastController);
 
   ngOnInit() {
     this.comunicadoId = this.route.snapshot.paramMap.get('id');

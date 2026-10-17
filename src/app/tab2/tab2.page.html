@@ -21,7 +21,14 @@
         <h3>Mis Cursos</h3>
       </div>
 
-      @if (asignaciones$ | async; as asignaciones) {
+      @if (cargando) {
+      <div class="spinner-container"><ion-spinner name="crescent"></ion-spinner></div>
+      } @else if (errorCarga) {
+      <div class="empty-state" role="alert">
+        <h2>No se pudieron cargar tus clases</h2>
+        <ion-button (click)="loadAsignaciones()">Reintentar</ion-button>
+      </div>
+      } @else if (asignaciones$ | async; as asignaciones) {
       @if (asignaciones.length > 0) {
       <div class="grid-actions">
         @for (asignacion of asignaciones; track asignacion.id) {
@@ -61,7 +68,7 @@
       <div class="empty-state">
         <ion-icon name="file-tray-stacked-outline"></ion-icon>
         <h2>No hay clases asignadas</h2>
-        <p>Cuando se creen asignaciones de cursos, aparecerán aquí.</p>
+        <p>Las clases disponibles para tu cuenta aparecerán aquí.</p>
       </div>
       }
       } @else {

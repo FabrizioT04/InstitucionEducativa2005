@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController } from '@ionic/angular';
 import { Auth, User, onAuthStateChanged } from '@angular/fire/auth';
+import { attendanceDate, normalizeAttendanceStatus } from '../core/attendance/attendance.model';
 import {
   Firestore,
   collection,
@@ -11,7 +12,6 @@ import {
   getDocs,
   doc,
   getDoc,
-  Timestamp,
 } from '@angular/fire/firestore';
 
 // Interface para agrupar
@@ -78,10 +78,11 @@ export class AttendanceHistoryPage implements OnInit {
         }
         
         // Convertir Timestamp a Date
-        const fecha = (asistencia['fecha'] as Timestamp).toDate();
+        const fecha = attendanceDate(asistencia['fecha']);
+        if (!fecha) return;
         asistenciasPorAsignacion
           .get(asignacionId)
-          ?.push({ id: doc.id, ...asistencia, fecha });
+          ?.push({ id: doc.id, ...asistencia, fecha, estado: normalizeAttendanceStatus(asistencia['estado']) ?? 'SIN REGISTRO' });
       });
 
       // 3. Obtener los detalles de cada asignación
@@ -139,6 +140,7 @@ export class AttendanceHistoryPage implements OnInit {
   formatDate(date: Date | undefined): string {
     if (!date) return '';
     return date.toLocaleDateString('es-ES', {
+      timeZone: 'America/Lima',
       year: 'numeric',
       month: 'long',
       day: 'numeric',

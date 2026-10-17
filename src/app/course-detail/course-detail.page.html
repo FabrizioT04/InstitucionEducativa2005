@@ -14,6 +14,9 @@
 
   <!-- Main Container -->
   <div class="main-container">
+    @if (errorClase) {
+    <ion-item role="alert"><ion-label class="ion-text-wrap">{{ errorClase }}</ion-label></ion-item>
+    }
     <!-- 1. Tarjeta de Información (Existente) -->
     @if (claseDetalles$ | async; as detalle) {
     <ion-card>
@@ -91,21 +94,22 @@
     }
     <ion-list [inset]="true">
       @for (calificacion of (misCalificaciones$ | async); track calificacion.id) {
-      <ion-item>
-        <ion-label>
-          <p>{{ calificacion.descripcion || 'Evaluación' }}</p>
-          <h3>{{ calificacion.nota || 'N/A' }}</h3>
-        </ion-label>
-        @if(calificacion.fecha) {
-        <ion-note slot="end">{{ formatTimestamp(calificacion.fecha) }}</ion-note>
-        }
-      </ion-item>
-      } @empty { @if (!cargandoCalificaciones) {
+      <app-grade-summary [grade]="calificacion"></app-grade-summary>
+      } @empty { @if (!cargandoCalificaciones && !errorCalificaciones) {
       <ion-item lines="none">
         <ion-label class="ion-text-center ion-padding-vertical">No hay calificaciones registradas.</ion-label>
       </ion-item>
       } }
     </ion-list>
+
+    @if (errorCalificaciones) {
+    <ion-item role="alert">
+      <ion-label class="ion-text-wrap">{{ errorCalificaciones }}</ion-label>
+      @if (currentUser && asignacionId) {
+      <ion-button (click)="loadMisCalificaciones(currentUser.uid, asignacionId)">Reintentar</ion-button>
+      }
+    </ion-item>
+    }
 
     <!-- Sección Mis Asistencias -->
     <ion-list-header>Asistencias Recientes</ion-list-header>
@@ -121,15 +125,24 @@
         <ion-badge
           [color]="asistencia.estado === 'PRESENTE' ? 'success' : (asistencia.estado === 'AUSENTE' ? 'danger' : 'warning')"
           slot="end">
-          {{ asistencia.estado }}
+          {{ asistencia.estado || 'Sin estado' }}
         </ion-badge>
       </ion-item>
-      } @empty { @if (!cargandoAsistencias) {
+      } @empty { @if (!cargandoAsistencias && !errorAsistencias) {
       <ion-item lines="none">
         <ion-label class="ion-text-center ion-padding-vertical">No hay asistencias registradas.</ion-label>
       </ion-item>
       } }
     </ion-list>
+
+    @if (errorAsistencias) {
+    <ion-item role="alert">
+      <ion-label class="ion-text-wrap">{{ errorAsistencias }}</ion-label>
+      @if (currentUser && asignacionId) {
+      <ion-button (click)="loadMisAsistencias(currentUser.uid, asignacionId)">Reintentar</ion-button>
+      }
+    </ion-item>
+    }
 
     <!-- ¡¡FIN DE NUEVA LÓGICA!! -->
     } @else if (userRole === 'estudiante' && !esEstudianteInscrito) {
@@ -139,7 +152,7 @@
         <ion-label class="ion-text-center ion-padding-vertical">No estás inscrito en esta clase.</ion-label>
       </ion-item>
     </ion-list>
-    } @else if (!userRole) {
+    } @else if (!userRole && !errorClase) {
     <!-- Estado de Carga Global (Spinner) -->
     <div class="ion-text-center ion-padding">
       <ion-spinner name="crescent"></ion-spinner>

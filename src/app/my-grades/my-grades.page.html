@@ -13,21 +13,18 @@
     <ion-spinner name="crescent"></ion-spinner>
     <p>Cargando calificaciones...</p>
   </div>
+  } @else if (errorCarga) {
+  <div class="ion-text-center ion-padding" role="alert">
+    <p>{{ errorCarga }}</p>
+    @if (currentUser) { <ion-button (click)="loadAllMyGrades(currentUser.uid)">Reintentar</ion-button> }
+  </div>
   } @else { @for (grupo of gruposDeCalificaciones; track grupo.id) {
   <ion-list-header color="light">
     {{ grupo.nombreCurso }} ({{ grupo.nombreGrado }})
   </ion-list-header>
   <ion-list [inset]="true">
     @for (calificacion of grupo.calificaciones; track calificacion.id) {
-    <ion-item>
-      <ion-label>
-        <p>{{ calificacion.descripcion || 'Evaluación' }}</p>
-        <h3>{{ calificacion.nota || 'N/A' }}</h3>
-      </ion-label>
-      @if(calificacion.fecha) {
-      <ion-note slot="end">{{ formatTimestamp(calificacion.fecha) }}</ion-note>
-      }
-    </ion-item>
+    <app-grade-summary [grade]="calificacion"></app-grade-summary>
     } @empty {
     <ion-item lines="none">
       <ion-label>No hay calificaciones para este curso.</ion-label>

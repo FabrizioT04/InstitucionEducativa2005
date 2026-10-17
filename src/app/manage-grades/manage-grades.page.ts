@@ -1,26 +1,21 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  IonicModule,
-  NavController,
-  ToastController,
-  LoadingController, // Necesitarás LoadingController
-} from '@ionic/angular';
+import { IonicModule, NavController, ToastController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import {
-  Firestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-  writeBatch,
-  setDoc, // Importar setDoc
-} from '@angular/fire/firestore';
+import { Firestore, collection, query, where, getDocs, doc, getDoc } from '@angular/fire/firestore';
 import { addIcons } from 'ionicons';
 import { saveOutline } from 'ionicons/icons';
+import { GradeInput, calculateGradeAverage, findTrimesterRecord, normalizeTrimesterGrades } from '../core/models/grade.model';
+import { GradesService } from '../core/services/grades.service';
+import { enrollmentStudentId } from '../core/models/enrollment.model';
+
+interface StudentGrades {
+  id: string;
+  nombreCompleto: string;
+  notas: GradeInput & { promedioFinal: number | null; calificacionId: string | null };
+  error: string | null;
+}
 
 @Component({
   selector: 'app-manage-grades',
@@ -30,20 +25,19 @@ import { saveOutline } from 'ionicons/icons';
   imports: [IonicModule, CommonModule, FormsModule],
 })
 export class ManageGradesPage implements OnInit {
-  public estudiantesConNotas: any[] = [];
+  public estudiantesConNotas: StudentGrades[] = [];
   public asignacionId: string | null = null;
-  public cursoId: string | null = null;
   public tituloClase = 'Gestionar Notas';
-
   public cargando = true;
   public guardando = false;
+  public errorCarga: string | null = null;
 
-  private firestore: Firestore = inject(Firestore);
-  private route: ActivatedRoute = inject(ActivatedRoute);
-  private navCtrl: NavController = inject(NavController); // Inyectar NavController
-  private toastCtrl: ToastController = inject(ToastController);
-  private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private loadingCtrl: LoadingController = inject(LoadingController); // Inyectar LoadingController
+  private readonly firestore = inject(Firestore);
+  private readonly gradesService = inject(GradesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly navCtrl = inject(NavController);
+  private readonly toastCtrl = inject(ToastController);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor() {
     addIcons({ saveOutline });
@@ -52,167 +46,101 @@ export class ManageGradesPage implements OnInit {
   ngOnInit() {
     this.asignacionId = this.route.snapshot.paramMap.get('id');
     if (this.asignacionId) {
-      this.loadStudentGrades();
+      void this.loadStudentGrades();
+    } else {
+      this.errorCarga = 'No se ha seleccionado una clase.';
+      this.cargando = false;
     }
   }
 
-  // Carga los estudiantes y sus notas
   async loadStudentGrades() {
+    if (!this.asignacionId) return;
     this.cargando = true;
+    this.errorCarga = null;
+    this.estudiantesConNotas = [];
     try {
-      // 1. Cargar datos de la asignación (para el título)
-      const asignacionRef = doc(
-        this.firestore,
-        'asignaciones',
-        this.asignacionId!
-      );
-      const asignacionSnap = await getDoc(asignacionRef);
-      if (asignacionSnap.exists()) {
-        const asignacionData = asignacionSnap.data();
-        this.cursoId = asignacionData['cursoId'];
-        const cursoRef = doc(this.firestore, 'cursos', this.cursoId!);
-        const cursoSnap = await getDoc(cursoRef);
-        if (cursoSnap.exists()) {
-          this.tituloClase = `Notas de ${cursoSnap.data()['nombre']}`;
-        }
-      }
+      const asignacionSnap = await getDoc(doc(this.firestore, 'asignaciones', this.asignacionId));
+      if (!asignacionSnap.exists()) throw new Error('La clase seleccionada ya no existe.');
+      const cursoSnap = await getDoc(doc(this.firestore, 'cursos', asignacionSnap.data()['cursoId']));
+      if (cursoSnap.exists()) this.tituloClase = `Notas de ${cursoSnap.data()['nombre']}`;
 
-      // 2. Buscar inscripciones de esta asignación
-      const qInscripciones = query(
-        collection(this.firestore, 'inscripciones'),
-        where('asignacionId', '==', this.asignacionId)
-      );
-      const inscripcionesSnapshot = await getDocs(qInscripciones);
+      const [inscripcionesSnapshot, calificaciones] = await Promise.all([
+        getDocs(query(collection(this.firestore, 'inscripciones'), where('asignacionId', '==', this.asignacionId))),
+        this.gradesService.getByAssignment(this.asignacionId),
+      ]);
+      const studentIds = Array.from(new Set(inscripcionesSnapshot.docs
+        .map((item) => enrollmentStudentId(item.data()))
+        .filter((id): id is string => id !== null)));
 
-      // 3. Procesar cada estudiante
-      const promesas = inscripcionesSnapshot.docs.map(async (inscripcionDoc) => {
-        // Usamos 'studentId' como lo corregimos en manage-attendance
-        const estudianteId = inscripcionDoc.data()['studentId'];
-        if (!estudianteId) return null;
-
-        const userRef = doc(this.firestore, 'usuarios', estudianteId);
-        const userSnap = await getDoc(userRef);
+      const students = await Promise.all(studentIds.map(async (studentId): Promise<StudentGrades | null> => {
+        const userSnap = await getDoc(doc(this.firestore, 'usuarios', studentId));
         if (!userSnap.exists()) return null;
-
-        // 4. Buscar calificaciones existentes para este estudiante
-        const qCalificaciones = query(
-          collection(this.firestore, 'calificaciones'),
-          where('asignacionId', '==', this.asignacionId),
-          where('studentId', '==', estudianteId) // Corregido: era 'estudianteId'
-        );
-        const calificacionSnap = await getDocs(qCalificaciones);
-
-        // --- INICIO DE CORRECCIÓN: 3 Trimestres ---
-        // Se define el tipo de 'notas' para que calificacionId acepte string
-        let notas: {
-          trimestre1: number;
-          trimestre2: number;
-          trimestre3: number;
-          promedioFinal: number;
-          calificacionId: string | null;
-        } = {
-          trimestre1: 0,
-          trimestre2: 0,
-          trimestre3: 0,
-          promedioFinal: 0,
-          calificacionId: null, // ID del documento de calificación si existe
-        };
-
-        if (!calificacionSnap.empty) {
-          const calificacionData = calificacionSnap.docs[0].data();
-          notas.trimestre1 = calificacionData['trimestre1'] || 0;
-          notas.trimestre2 = calificacionData['trimestre2'] || 0;
-          notas.trimestre3 = calificacionData['trimestre3'] || 0;
-          notas.promedioFinal = calificacionData['promedioFinal'] || 0;
-          notas.calificacionId = calificacionSnap.docs[0].id; // <-- Esta línea ahora es válida
-        }
-        // --- FIN DE CORRECCIÓN ---
-
+        const record = findTrimesterRecord(calificaciones, studentId);
+        const grades = normalizeTrimesterGrades(record ?? {
+          trimestre1: null, trimestre2: null, trimestre3: null,
+        });
         return {
-          id: userSnap.id,
-          nombreCompleto: userSnap.data()['nombreCompleto'],
-          notas: notas,
+          id: studentId,
+          nombreCompleto: userSnap.data()['nombreCompleto'] || 'Estudiante',
+          notas: {
+            ...grades,
+            promedioFinal: calculateGradeAverage(grades),
+            calificacionId: record?.id ?? null,
+          },
+          error: null,
         };
-      });
-
-      this.estudiantesConNotas = (await Promise.all(promesas)).filter(
-        (e) => e !== null
-      ) as any[];
+      }));
+      this.estudiantesConNotas = students.filter((student): student is StudentGrades => student !== null)
+        .sort((a, b) => a.nombreCompleto.localeCompare(b.nombreCompleto, 'es'));
     } catch (error) {
-      console.error('Error al cargar datos de estudiantes:', error);
-      this.presentToast(
-        'Error fatal al cargar los datos. Revise la consola.',
-        'danger'
-      );
+      console.error('Error al cargar las calificaciones:', error);
+      this.errorCarga = error instanceof Error ? error.message : 'No se pudieron cargar las calificaciones.';
     } finally {
       this.cargando = false;
       this.cdr.detectChanges();
     }
   }
 
-  // --- Se actualiza el cálculo para 3 notas ---
-  calcularPromedio(item: any) {
-    const nota1 = Number(item.notas.trimestre1) || 0;
-    const nota2 = Number(item.notas.trimestre2) || 0;
-    const nota3 = Number(item.notas.trimestre3) || 0;
-
-    // Contar solo las notas ingresadas para el promedio (o dividir por 3 si prefieres)
-    let notasIngresadas = 0;
-    if (nota1 > 0) notasIngresadas++;
-    if (nota2 > 0) notasIngresadas++;
-    if (nota3 > 0) notasIngresadas++;
-
-    const promedio = (nota1 + nota2 + nota3) / (notasIngresadas || 1); // Evitar dividir por 0
-
-    item.notas.promedioFinal = Math.round(promedio * 100) / 100;
+  calcularPromedio(item: StudentGrades) {
+    try {
+      item.notas.promedioFinal = calculateGradeAverage(item.notas);
+      item.error = null;
+    } catch {
+      item.notas.promedioFinal = null;
+      item.error = 'Ingresa notas entre 0 y 20 o deja el trimestre pendiente.';
+    }
   }
 
-  // --- Se guardan los 3 trimestres ---
   async saveGrades() {
+    if (this.guardando || this.cargando || this.errorCarga || !this.asignacionId) return;
+    this.estudiantesConNotas.forEach((item) => this.calcularPromedio(item));
+    if (this.estudiantesConNotas.some((item) => item.error)) {
+      await this.presentToast('Corrige las notas inválidas antes de guardar.', 'warning');
+      return;
+    }
+    // Leave ungraded students without a new document; allow clearing existing grades.
+    const updates = this.estudiantesConNotas
+      .filter((item) => item.notas.calificacionId !== null || item.notas.promedioFinal !== null)
+      .map((item) => ({ studentId: item.id, documentId: item.notas.calificacionId, grades: item.notas }));
+    if (updates.length === 0) {
+      await this.presentToast('No hay notas para guardar.', 'warning');
+      return;
+    }
     this.guardando = true;
-    const batch = writeBatch(this.firestore);
-
-    this.estudiantesConNotas.forEach((item) => {
-      // Decide si crear un doc nuevo o actualizar uno existente
-      const calificacionRef = item.notas.calificacionId
-        ? doc(this.firestore, 'calificaciones', item.notas.calificacionId)
-        : doc(collection(this.firestore, 'calificaciones')); // Crea una nueva referencia
-
-      // Guardamos la nota
-      batch.set(
-        calificacionRef,
-        {
-          asignacionId: this.asignacionId,
-          studentId: item.id, // Corregido: era 'estudianteId'
-          trimestre1: Number(item.notas.trimestre1) || 0,
-          trimestre2: Number(item.notas.trimestre2) || 0,
-          trimestre3: Number(item.notas.trimestre3) || 0,
-          promedioFinal: item.notas.promedioFinal,
-          fecha: new Date(), // Guardar la fecha de la última modificación
-        },
-        { merge: true } // 'merge: true' es útil si actualizas
-      );
-    });
-
     try {
-      await batch.commit();
-      this.presentToast('Notas guardadas con éxito.', 'success');
-      this.navCtrl.back(); // Volver atrás después de guardar
+      await this.gradesService.saveForAssignment(this.asignacionId, updates);
+      await this.presentToast('Notas guardadas con éxito.', 'success');
+      this.navCtrl.back();
     } catch (error) {
-      console.error('Ocurrió un error al guardar las notas:', error);
-      this.presentToast('Ocurrió un error al guardar las notas.', 'danger');
+      console.error('Error al guardar las notas:', error);
+      await this.presentToast('No se pudieron guardar todas las notas. Puedes volver a intentarlo.', 'danger');
     } finally {
       this.guardando = false;
     }
   }
 
-  // Función utilitaria para mostrar mensajes
   async presentToast(message: string, color: 'success' | 'danger' | 'warning') {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 3000,
-      color,
-    });
-    toast.present();
+    const toast = await this.toastCtrl.create({ message, duration: 3000, color });
+    await toast.present();
   }
 }
