@@ -1,0 +1,82 @@
+name: Deploy Firebase Hosting production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-production
+  cancel-in-progress: false
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require main
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Production must be dispatched from the main branch."
+            exit 1
+          fi
+
+  validate:
+    needs: check-branch
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build production web application
+        run: npm run build:web:production
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          FIREBASE_WEB_CONFIG: ${{ vars.FIREBASE_WEB_CONFIG }}
+      - name: Validate Hosting credentials and destination
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          node <<'NODE'
+          const { createPrivateKey } = require('node:crypto');
+          const fail = message => { console.error(`::error::${message}`); process.exit(1); };
+          const projectId = process.env.FIREBASE_PROJECT_ID;
+          if (!projectId?.trim()) fail('Set FIREBASE_PROJECT_ID in the production GitHub environment.');
+          if (!process.env.FIREBASE_SERVICE_ACCOUNT?.trim()) {
+            fail('Set the FIREBASE_SERVICE_ACCOUNT secret in the production GitHub environment.');
+          }
+          let account;
+          try { account = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT); }
+          catch { fail('FIREBASE_SERVICE_ACCOUNT must contain valid service-account JSON.'); }
+          if (account?.type !== 'service_account') fail('FIREBASE_SERVICE_ACCOUNT must be a service account.');
+          if (account.project_id !== projectId) {
+            fail('The service-account project_id must match the production FIREBASE_PROJECT_ID.');
+          }
+          if (typeof account.client_email !== 'string' || !account.client_email.endsWith('.iam.gserviceaccount.com')) {
+            fail('The service account must contain a valid client_email.');
+          }
+          try { createPrivateKey(account.private_key); }
+          catch { fail('The service account must contain a valid private_key.'); }
+          console.log('Hosting credentials match the production project.');
+          NODE
+      - name: Publish live website
+        uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ vars.FIREBASE_PROJECT_ID }}
+          channelId: live
+          disableComment: true
+          firebaseToolsVersion: 15.34.0

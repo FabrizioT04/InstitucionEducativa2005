@@ -68,3 +68,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Generated Firebase web configuration and local Hosting state
+/src/environments/firebaseConfig.web.generated.ts
+/.firebase/
+/firebase.*.local.json

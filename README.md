@@ -17,9 +17,12 @@ La aplicación se sirve en `http://localhost:4200`. La configuración Firebase d
 npm run build
 npm run lint
 npm run test:foundation
+npm run test:deployment
 ```
 
-`build` genera la aplicación web en `www/`. `test:foundation` ejecuta sin Firebase real las pruebas de regresión de los módulos refactorizados y requiere Chrome. En un entorno con una instalación diferente de Chrome, configurar `CHROME_BIN` con la ruta del ejecutable. `npm test` conserva la suite completa original; su modernización continúa por módulos. Las pruebas originales de `attendance-history` y `enroll-students` todavía contienen mocks incompatibles con Firestore modular y bloquean la compilación de esa suite. La integración continua compila producción, ejecuta el linter y valida las regresiones de esta etapa mediante `tsconfig.foundation.json`.
+`build` genera la aplicación para Capacitor en `www/` y conserva la configuración Firebase existente. Los comandos `build:web:staging` y `build:web:production` generan la web en `dist/web/` con la configuración explícita de cada entorno. Ver la [guía de despliegue](docs/deployment.md) antes de publicar.
+
+`test:foundation` ejecuta sin Firebase real las pruebas de regresión de los módulos refactorizados y requiere Chrome. En un entorno con una instalación diferente de Chrome, configurar `CHROME_BIN` con la ruta del ejecutable. `test:deployment` comprueba la selección de entorno, el rechazo de configuraciones cruzadas o credenciales privadas y la verificación previa al despliegue. Tras un build web, `test:hosting` comprueba rutas y caché con el emulador local (descarga la CLI fijada; no ejecuta el JavaScript de la aplicación ni accede a datos reales). `npm test` conserva la suite completa original; su modernización continúa por módulos. Las pruebas originales de `attendance-history` y `enroll-students` todavía contienen mocks incompatibles con Firestore modular y bloquean la compilación de esa suite. La integración continua compila ambos destinos, ejecuta el linter y valida las regresiones de esta etapa mediante `tsconfig.foundation.json`.
 
 Para sincronizar una compilación con Android:
 
@@ -28,6 +31,12 @@ npx cap sync android
 ```
 
 La generación del APK requiere además el SDK Android y el JDK correspondientes al proyecto Gradle.
+
+## Publicación web
+
+Firebase Hosting sirve `dist/web/` y resuelve las rutas de Angular al recargar. Las vistas previas por PR están desactivadas hasta configurar el entorno `staging` y habilitar `ENABLE_FIREBASE_PREVIEWS`. La publicación de producción se inicia manualmente desde `main` y requiere el entorno `production`. Ambos flujos ejecutan las verificaciones antes de publicar y solo despliegan Hosting.
+
+La configuración cliente y el proyecto de Hosting deben coincidir. El build de pruebas rechaza el proyecto de producción indicado en `.firebaserc`; el build de producción exige ese proyecto. La [guía de despliegue](docs/deployment.md) detalla las variables, el secreto de publicación, las pruebas manuales y la reversión. Subir estos archivos a GitHub no crea proyectos Firebase ni publica la aplicación.
 
 ## Organización
 
