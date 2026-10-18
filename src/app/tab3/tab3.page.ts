@@ -8,7 +8,29 @@ import { AccessRepository } from '../core/auth/access.repository';
 import { parseUserRole, UserRole } from '../core/auth/access.models';
 import { Storage, ref, uploadString, getDownloadURL } from '@angular/fire/storage';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { camera, logOutOutline, ribbonOutline, checkmarkDoneOutline } from 'ionicons/icons';
+import { bookOutline, camera, checkmarkDoneOutline, layersOutline, logOutOutline, peopleOutline, personCircleOutline, ribbonOutline, schoolOutline } from 'ionicons/icons';
+
+interface ProfileLink {
+  label: string;
+  path: string;
+  icon: string;
+}
+
+const PROFILE_LINKS: Record<UserRole, readonly ProfileLink[]> = {
+  administrador: [
+    { label: 'Gestionar usuarios', path: '/user-list', icon: peopleOutline },
+    { label: 'Gestionar cursos', path: '/manage-courses', icon: bookOutline },
+    { label: 'Gestionar grados', path: '/grade-management', icon: schoolOutline },
+    { label: 'Clases y asignaciones', path: '/tabs/tab2', icon: layersOutline },
+  ],
+  profesor: [
+    { label: 'Mis clases', path: '/tabs/tab2', icon: bookOutline },
+  ],
+  estudiante: [
+    { label: 'Mis Calificaciones', path: '/my-grades', icon: ribbonOutline },
+    { label: 'Historial de Asistencia', path: '/attendance-history', icon: checkmarkDoneOutline },
+  ],
+};
 
 // Interfaz para tipar los datos del usuario
 interface UserProfile {
@@ -29,6 +51,7 @@ export class Tab3Page implements OnInit, OnDestroy {
   public currentUser: User | null = null;
   public userProfile: UserProfile | null = null;
   public cargando = true;
+  readonly icons = { camera, logOutOutline, personCircleOutline };
   private unsubscribeAuth?: () => void;
   private loadVersion = 0;
 
@@ -64,9 +87,8 @@ export class Tab3Page implements OnInit, OnDestroy {
     this.unsubscribeAuth?.();
   }
 
-  get icons() {
-    // 1. AÑADIMOS LOS NUEVOS ICONOS
-    return { camera, logOutOutline, ribbonOutline, checkmarkDoneOutline };
+  get accountLinks(): readonly ProfileLink[] {
+    return this.userProfile ? PROFILE_LINKS[this.userProfile.rol] : [];
   }
 
   async loadUserProfile(uid: string) {
