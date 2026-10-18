@@ -1,0 +1,36 @@
+name: Validate application
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run test:foundation
+      - run: npm run test:deployment
+      - name: Verify the web build with synthetic Firebase configuration
+        run: npm run build:web:staging
+        env:
+          FIREBASE_PROJECT_ID: demo-ie2005-staging
+          FIREBASE_WEB_CONFIG: >-
+            {"apiKey":"AIzaSyDummyKeyForBuildOnly000000000000000","authDomain":"demo-ie2005-staging.firebaseapp.com","projectId":"demo-ie2005-staging","storageBucket":"demo-ie2005-staging.firebasestorage.app","messagingSenderId":"123456789012","appId":"1:123456789012:web:0000000000000000000000"}
+      - name: Check deep links and cache headers in the Hosting emulator
+        run: npm run test:hosting

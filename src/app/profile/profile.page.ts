@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController, ToastController, ActionSheetController } from '@ionic/angular';
@@ -20,14 +20,12 @@ export class ProfilePage implements OnInit {
   public cargando = true;
   private currentUser: User | null = null;
 
-  constructor(
-    private auth: Auth,
-    private firestore: Firestore,
-    private storage: Storage,
-    private navController: NavController,
-    private toastController: ToastController,
-    private cdr: ChangeDetectorRef
-  ) { }
+  private readonly auth = inject(Auth);
+  private readonly firestore = inject(Firestore);
+  private readonly storage = inject(Storage);
+  private readonly navController = inject(NavController);
+  private readonly toastController = inject(ToastController);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.auth.onAuthStateChanged(user => {

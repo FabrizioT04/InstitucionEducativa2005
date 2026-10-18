@@ -7,7 +7,7 @@
     <ion-title>{{ tituloClase }}</ion-title>
     <ion-buttons slot="end">
       <!-- Botón para guardar -->
-      <ion-button (click)="saveGrades()" [disabled]="guardando">
+      <ion-button (click)="saveGrades()" [disabled]="guardando || cargando || !!errorCarga || estudiantesConNotas.length === 0" aria-label="Guardar notas">
         <ion-icon slot="icon-only" name="save-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -24,7 +24,13 @@
   }
 
   <!-- Si no hay estudiantes -->
-  @if (!cargando && estudiantesConNotas.length === 0) {
+  @if (errorCarga) {
+  <div class="ion-text-center ion-padding" role="alert">
+    <p>{{ errorCarga }}</p>
+    <ion-button (click)="loadStudentGrades()">Reintentar</ion-button>
+  </div>
+  }
+  @if (!cargando && !errorCarga && estudiantesConNotas.length === 0) {
   <div class="ion-text-center ion-padding-top">
     <ion-label>No hay estudiantes inscritos para calificar.</ion-label>
   </div>
@@ -36,6 +42,7 @@
     y permitir scroll horizontal en pantallas pequeñas.
   -->
   @if (!cargando && estudiantesConNotas.length > 0) {
+  <p class="ion-padding-horizontal">Notas de 0 a 20. Deja en blanco los trimestres pendientes. El promedio incluye únicamente los trimestres calificados, incluido el cero.</p>
   <div class="table-container">
     <table>
       <thead>
@@ -44,21 +51,27 @@
           <th>Trim. 1</th>
           <th>Trim. 2</th>
           <th>Trim. 3</th>
-          <th>Prom.</th>
+          <th>Promedio actual</th>
         </tr>
       </thead>
       <tbody>
         @for (item of estudiantesConNotas; track item.id) {
         <tr>
           <!-- Nombre del Estudiante -->
-          <td class="student-name">{{ item.nombreCompleto }}</td>
+          <td class="student-name">
+            {{ item.nombreCompleto }}
+            @if (item.error) { <p role="alert">{{ item.error }}</p> }
+          </td>
 
           <!-- Input para Trimestre 1 -->
           <td>
             <ion-input
               type="number"
+              min="0" max="20" step="0.01" placeholder="—"
+              [disabled]="guardando"
+              [attr.aria-label]="'Trimestre 1 de ' + item.nombreCompleto"
               [(ngModel)]="item.notas.trimestre1"
-              (ionChange)="calcularPromedio(item)"
+              (ngModelChange)="calcularPromedio(item)"
               class="grade-input"
             ></ion-input>
           </td>
@@ -67,8 +80,11 @@
           <td>
             <ion-input
               type="number"
+              min="0" max="20" step="0.01" placeholder="—"
+              [disabled]="guardando"
+              [attr.aria-label]="'Trimestre 2 de ' + item.nombreCompleto"
               [(ngModel)]="item.notas.trimestre2"
-              (ionChange)="calcularPromedio(item)"
+              (ngModelChange)="calcularPromedio(item)"
               class="grade-input"
             ></ion-input>
           </td>
@@ -77,15 +93,18 @@
           <td>
             <ion-input
               type="number"
+              min="0" max="20" step="0.01" placeholder="—"
+              [disabled]="guardando"
+              [attr.aria-label]="'Trimestre 3 de ' + item.nombreCompleto"
               [(ngModel)]="item.notas.trimestre3"
-              (ionChange)="calcularPromedio(item)"
+              (ngModelChange)="calcularPromedio(item)"
               class="grade-input"
             ></ion-input>
           </td>
 
           <!-- Promedio (Solo lectura) -->
           <td>
-            <span class="promedio-final">{{ item.notas.promedioFinal | number:'1.1-2' }}</span>
+            <span class="promedio-final">{{ item.notas.promedioFinal === null ? 'Pendiente' : (item.notas.promedioFinal | number:'1.1-2') }}</span>
           </td>
         </tr>
         }

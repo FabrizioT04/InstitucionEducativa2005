@@ -1,39 +1,34 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import { Auth, User, onAuthStateChanged } from '@angular/fire/auth';
-import {
-  Firestore,
-  doc,
-  getDoc,
-  query,
-  where,
-  collection,
-  getDocs,
-  DocumentData,
-  Timestamp, // Importar Timestamp
-} from '@angular/fire/firestore';
+import { Auth, User } from '@angular/fire/auth';
+import { Firestore, doc, getDoc, query, where, collection, getDocs } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
+import { GradeRecord } from '../core/models/grade.model';
+import { GradesService } from '../core/services/grades.service';
+import { GradeSummaryComponent } from '../shared/grade-summary/grade-summary.component';
+import { AttendanceStatus, attendanceDate, normalizeAttendanceStatus } from '../core/attendance/attendance.model';
+import { AccessRepository } from '../core/auth/access.repository';
+import { parseUserRole } from '../core/auth/access.models';
 import { addIcons } from 'ionicons';
 import {
-  personCircleOutline,
-  schoolOutline,
-  timeOutline,
-  statsChartOutline,
-  checkmarkDoneOutline,
-  createOutline,
-  personAddOutline, // Asumo que lo tenías
-  trashOutline, // Asumo que lo tenías
+  personCircleOutline, schoolOutline, timeOutline, statsChartOutline,
+  checkmarkDoneOutline, createOutline, personAddOutline, trashOutline,
 } from 'ionicons/icons';
 
-// --- Interfaces ---
 interface ClaseDetalle {
   nombreCurso: string;
   nombreGrado: string;
   nombreProfesor: string;
+}
+
+interface AsistenciaResumen {
+  id: string;
+  fecha: Date;
+  estado: AttendanceStatus | null;
 }
 
 @Component({
@@ -41,197 +36,196 @@ interface ClaseDetalle {
   templateUrl: './course-detail.page.html',
   styleUrls: ['./course-detail.page.css'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [IonicModule, CommonModule, FormsModule, GradeSummaryComponent],
 })
-export class CourseDetailPage implements OnInit {
-  // --- Propiedades Existentes ---
+export class CourseDetailPage implements OnInit, OnDestroy {
   public asignacionId: string | null = null;
   public userRole: string | null = null;
   public esProfesorDeEstaClase = false;
   public esEstudianteInscrito = false;
   public claseDetalles$: Observable<ClaseDetalle | null> = of(null);
   public currentUser: User | null = null;
-
-  // --- NUEVAS PROPIEDADES ---
-  public misCalificaciones$: Observable<any[]> = of([]);
-  public misAsistencias$: Observable<any[]> = of([]);
+  public errorClase: string | null = null;
+  public misCalificaciones$: Observable<GradeRecord[]> = of([]);
+  public errorCalificaciones: string | null = null;
+  public misAsistencias$: Observable<AsistenciaResumen[]> = of([]);
+  public errorAsistencias: string | null = null;
   public cargandoCalificaciones = false;
   public cargandoAsistencias = false;
 
-  // --- Inyección de Dependencias ---
-  private firestore: Firestore = inject(Firestore);
-  private auth: Auth = inject(Auth);
-  private navCtrl: NavController = inject(NavController);
-  private route: ActivatedRoute = inject(ActivatedRoute);
+  private readonly firestore = inject(Firestore);
+  private readonly gradesService = inject(GradesService);
+  private readonly accessRepository = inject(AccessRepository);
+  private readonly auth = inject(Auth);
+  private readonly navCtrl = inject(NavController);
+  private readonly route = inject(ActivatedRoute);
+  private unsubscribeAuth?: () => void;
+  private pageRequest = 0;
+  private gradeRequest = 0;
+  private attendanceRequest = 0;
 
   constructor() {
-    // Reconstruido de capturas anteriores
     addIcons({
-      personCircleOutline,
-      schoolOutline,
-      timeOutline,
-      statsChartOutline,
-      checkmarkDoneOutline,
-      createOutline,
-      personAddOutline,
-      trashOutline,
+      personCircleOutline, schoolOutline, timeOutline, statsChartOutline,
+      checkmarkDoneOutline, createOutline, personAddOutline, trashOutline,
     });
   }
 
   ngOnInit() {
-    onAuthStateChanged(this.auth, (user) => {
+    this.unsubscribeAuth = this.auth.onAuthStateChanged((user) => {
+      this.resetPage();
       this.currentUser = user;
-      if (!this.currentUser) {
+      if (!user) {
         this.navCtrl.navigateRoot('/login');
         return;
       }
-
       this.asignacionId = this.route.snapshot.paramMap.get('id');
       if (this.asignacionId) {
-        this.loadRoleAndPageData(this.currentUser.uid, this.asignacionId);
+        void this.loadRoleAndPageData(user.uid, this.asignacionId);
       } else {
-        console.error('No se encontró ID de asignación en la URL');
         this.navCtrl.back();
       }
     });
   }
 
-  async loadRoleAndPageData(uid: string, asignacionId: string) {
-    // 1. Cargar Rol
-    const userDocRef = doc(this.firestore, 'usuarios', uid);
-    const userSnap = await getDoc(userDocRef);
+  ngOnDestroy() {
+    this.unsubscribeAuth?.();
+    this.resetPage();
+  }
 
-    if (userSnap.exists()) {
-      this.userRole = userSnap.data()['rol']?.toLowerCase() || null;
-      console.log('ROL CARGADO PARA MOSTRAR BOTONES:', this.userRole);
-      // 2. Cargar Detalles de Página
-      this.loadPageDetails(uid, asignacionId);
-    } else {
-      console.error('No se encontró documento de perfil para el usuario.');
+  private resetPage() {
+    this.pageRequest++;
+    this.gradeRequest++;
+    this.attendanceRequest++;
+    this.userRole = null;
+    this.esProfesorDeEstaClase = false;
+    this.esEstudianteInscrito = false;
+    this.errorClase = null;
+    this.errorCalificaciones = null;
+    this.errorAsistencias = null;
+    this.cargandoCalificaciones = false;
+    this.cargandoAsistencias = false;
+    this.claseDetalles$ = of(null);
+    this.misCalificaciones$ = of([]);
+    this.misAsistencias$ = of([]);
+  }
+
+  async loadRoleAndPageData(uid: string, asignacionId: string) {
+    const request = ++this.pageRequest;
+    try {
+      const profile = await this.accessRepository.getProfile(uid);
+      if (request !== this.pageRequest) return;
+      this.userRole = parseUserRole(profile?.['rol']);
+      if (!this.userRole) {
+        this.errorClase = 'No se encontró un perfil válido para acceder a la clase.';
+        return;
+      }
+      await this.loadPageDetails(uid, asignacionId, request);
+    } catch (error) {
+      if (request !== this.pageRequest) return;
+      console.error('Error al cargar la clase:', error);
+      this.errorClase = 'No se pudieron cargar los detalles de la clase.';
     }
   }
 
-  async loadPageDetails(uid: string, asignacionId: string) {
-    // 2. Cargar los detalles de la clase (asignacion)
-    this.claseDetalles$ = from(
-      getDoc(doc(this.firestore, 'asignaciones', asignacionId))
-    ).pipe(
-      switchMap(async (asignacionSnap) => {
-        if (!asignacionSnap.exists()) {
-          return null;
-        }
-        const data = asignacionSnap.data();
-
-        // Verificar si es profesor
-        if (this.userRole === 'profesor' && data['profesorId'] === uid) {
-          this.esProfesorDeEstaClase = true;
-        }
-
-        // Cargar datos referenciados
-        const cursoRef = doc(this.firestore, 'cursos', data['cursoId']);
-        const gradoRef = doc(this.firestore, 'grados', data['gradoId']);
-        const profesorRef = doc(this.firestore, 'usuarios', data['profesorId']);
-
+  async loadPageDetails(uid: string, asignacionId: string, request = ++this.pageRequest) {
+    this.esProfesorDeEstaClase = false;
+    this.esEstudianteInscrito = false;
+    this.claseDetalles$ = from(this.accessRepository.getAssignment(asignacionId)).pipe(
+      switchMap(async (assignment) => {
+        if (request !== this.pageRequest || !assignment) return null;
+        this.esProfesorDeEstaClase = this.userRole === 'profesor' && assignment['profesorId'] === uid;
         const [cursoSnap, gradoSnap, profesorSnap] = await Promise.all([
-          getDoc(cursoRef),
-          getDoc(gradoRef),
-          getDoc(profesorRef),
+          getDoc(doc(this.firestore, 'cursos', String(assignment['cursoId']))),
+          getDoc(doc(this.firestore, 'grados', String(assignment['gradoId']))),
+          getDoc(doc(this.firestore, 'usuarios', String(assignment['profesorId']))),
         ]);
-
-        const nombreCurso = cursoSnap.exists()
-          ? cursoSnap.data()['nombre']
-          : 'Curso Desconocido';
-        const nombreGrado = gradoSnap.exists()
-          ? `${gradoSnap.data()['nombre']} - ${gradoSnap.data()['seccion']}`
-          : '';
-        const nombreProfesor = profesorSnap.exists()
-          ? profesorSnap.data()['nombreCompleto']
-          : 'Profesor no asignado';
-
-        return { nombreCurso, nombreGrado, nombreProfesor };
-      })
+        if (request !== this.pageRequest) return null;
+        return {
+          nombreCurso: cursoSnap.exists() ? cursoSnap.data()['nombre'] : 'Curso no disponible',
+          nombreGrado: gradoSnap.exists() ? `${gradoSnap.data()['nombre']} - ${gradoSnap.data()['seccion']}` : '',
+          nombreProfesor: profesorSnap.exists() ? profesorSnap.data()['nombreCompleto'] : 'Profesor no asignado',
+        };
+      }),
+      catchError((error) => {
+        if (request === this.pageRequest) {
+          console.error('Error al cargar los detalles de la clase:', error);
+          this.errorClase = 'No se pudieron cargar los detalles de la clase.';
+        }
+        return of(null);
+      }),
     );
 
-    // 3. Verificar si el estudiante está inscrito Y CARGAR SUS DATOS
     if (this.userRole === 'estudiante') {
-      const inscripcionesQuery = query(
-        collection(this.firestore, 'inscripciones'),
-        where('studentId', '==', uid), // Usamos 'studentId' (de create-user)
-        where('asignacionId', '==', asignacionId)
-      );
-      const inscripcionesSnap = await getDocs(inscripcionesQuery);
-      this.esEstudianteInscrito = !inscripcionesSnap.empty;
-
-      // --- ¡¡INICIO DE LA NUEVA LÓGICA!! ---
-      if (this.esEstudianteInscrito) {
-        // Si está inscrito, cargamos sus notas y asistencias
+      // Use the same enrollment lookup as the guard, including legacy estudianteId records.
+      const enrolled = await this.accessRepository.isStudentEnrolled(uid, asignacionId);
+      if (request !== this.pageRequest) return;
+      this.esEstudianteInscrito = enrolled;
+      if (enrolled) {
         this.loadMisCalificaciones(uid, asignacionId);
         this.loadMisAsistencias(uid, asignacionId);
       }
-      // --- ¡¡FIN DE LA NUEVA LÓGICA!! ---
     }
   }
 
-  // --- ¡¡NUEVA FUNCIÓN!! ---
   loadMisCalificaciones(studentId: string, asignacionId: string) {
+    const request = ++this.gradeRequest;
     this.cargandoCalificaciones = true;
-    // Asumimos que las calificaciones se guardan con 'studentId'
-    const q = query(
-      collection(this.firestore, 'calificaciones'),
-      where('studentId', '==', studentId),
-      where('asignacionId', '==', asignacionId)
-    );
-
-    this.misCalificaciones$ = from(getDocs(q)).pipe(
-      map((snapshot) => {
-        this.cargandoCalificaciones = false;
-        return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      })
+    this.errorCalificaciones = null;
+    this.misCalificaciones$ = from(this.gradesService.getByStudent(studentId, asignacionId)).pipe(
+      map((grades) => request === this.gradeRequest ? grades : []),
+      catchError((error) => {
+        if (request === this.gradeRequest) {
+          console.error('Error al cargar las calificaciones:', error);
+          this.errorCalificaciones = 'No se pudieron cargar las calificaciones.';
+        }
+        return of([]);
+      }),
+      finalize(() => {
+        if (request === this.gradeRequest) this.cargandoCalificaciones = false;
+      }),
     );
   }
 
-  // --- ¡¡NUEVA FUNCIÓN!! ---
   loadMisAsistencias(studentId: string, asignacionId: string) {
+    const request = ++this.attendanceRequest;
     this.cargandoAsistencias = true;
-    const q = query(
+    this.errorAsistencias = null;
+    const attendanceQuery = query(
       collection(this.firestore, 'asistencias'),
-      // Importante: manage-attendance guarda 'estudianteId'
       where('estudianteId', '==', studentId),
-      where('asignacionId', '==', asignacionId)
+      where('asignacionId', '==', asignacionId),
     );
-
-    this.misAsistencias$ = from(getDocs(q)).pipe(
+    this.misAsistencias$ = from(getDocs(attendanceQuery)).pipe(
       map((snapshot) => {
-        this.cargandoAsistencias = false;
-        return snapshot.docs.map((doc) => {
-          const data = doc.data();
-          // Convertir Timestamp de Firestore a Date de JS
-          const fecha = (data['fecha'] as Timestamp).toDate();
-          return { id: doc.id, ...data, fecha };
-        });
-      })
+        if (request !== this.attendanceRequest) return [];
+        return snapshot.docs.map((item): AsistenciaResumen | null => {
+          const data = item.data();
+          const fecha = attendanceDate(data['fecha']);
+          return fecha ? { id: item.id, fecha, estado: normalizeAttendanceStatus(data['estado']) } : null;
+        }).filter((item): item is AsistenciaResumen => item !== null)
+          .sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+      }),
+      catchError((error) => {
+        if (request === this.attendanceRequest) {
+          console.error('Error al cargar las asistencias:', error);
+          this.errorAsistencias = 'No se pudieron cargar las asistencias.';
+        }
+        return of([]);
+      }),
+      finalize(() => {
+        if (request === this.attendanceRequest) this.cargandoAsistencias = false;
+      }),
     );
   }
 
-  // --- ¡¡NUEVA FUNCIÓN!! ---
-  // Helper para formatear la fecha
   formatDate(date: Date | undefined): string {
-    if (!date) return '';
+    if (!date || !Number.isFinite(date.getTime())) return '';
     return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+      timeZone: 'America/Lima', year: 'numeric', month: 'long', day: 'numeric',
     });
   }
-  
-  // Helper para convertir timestamp de calificacion (si existe)
-  formatTimestamp(timestamp: Timestamp | undefined): string {
-    if (!timestamp) return '';
-    return this.formatDate(timestamp.toDate());
-  }
 
-  // --- Funciones de Navegación Existentes ---
-  // (Reconstruidas de capturas anteriores)
   goToManageAttendance() {
     this.navCtrl.navigateForward(`/manage-attendance/${this.asignacionId}`);
   }
@@ -242,14 +236,10 @@ export class CourseDetailPage implements OnInit {
     this.navCtrl.navigateForward(`/enroll-students/${this.asignacionId}`);
   }
   goToMyGrades() {
-    this.navCtrl.navigateForward(`/my-grades`);
+    this.navCtrl.navigateForward('/my-grades');
   }
   goToMyAttendance() {
-    this.navCtrl.navigateForward(`/attendance-history`);
+    this.navCtrl.navigateForward('/attendance-history');
   }
-  // Asumo que esta existe para el admin
-  goToEditAssignment() {
-    // Lógica para editar asignación
-  }
+  goToEditAssignment() {}
 }
-

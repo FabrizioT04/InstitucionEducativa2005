@@ -9,21 +9,26 @@
 
 <ion-content class="ion-padding">
   <ion-item>
-    <ion-select label="Seleccionar Clase" placeholder="Elige una clase" [(ngModel)]="asignacionSeleccionada" (ionChange)="cargarEstudiantes()">
+    <ion-select label="Seleccionar Clase" placeholder="Elige una clase" [value]="asignacionSeleccionada" (ionChange)="onClaseChange($event.detail.value)" [disabled]="cargandoAsignaciones || guardando">
       <ion-select-option *ngFor="let asignacion of asignaciones" [value]="asignacion.id">
-        {{ asignacion.nombreCurso }} - {{ asignacion.nombreGrado }}
+        {{ asignacion.nombreCompleto }}
       </ion-select-option>
     </ion-select>
   </ion-item>
 
-  <ion-spinner *ngIf="cargandoEstudiantes" name="crescent" class="spinner-center"></ion-spinner>
+  <p class="ion-text-center">Fecha de asistencia: {{ dia }} (Perú)</p>
+  <ion-spinner *ngIf="cargandoAsignaciones || cargandoEstudiantes" name="crescent" class="spinner-center"></ion-spinner>
+  <div *ngIf="errorCarga" class="ion-text-center ion-padding">
+    <p>No se pudo cargar la lista de asistencia.</p>
+    <ion-button (click)="cargarEstudiantes()">Reintentar</ion-button>
+  </div>
 
   <div *ngIf="asignacionSeleccionada && !cargandoEstudiantes">
     <ion-list-header>
       <ion-label>Lista de Alumnos</ion-label>
     </ion-list-header>
 
-    <div *ngIf="estudiantes.length === 0" class="ion-text-center ion-padding">
+    <div *ngIf="estudiantes.length === 0 && !errorCarga" class="ion-text-center ion-padding">
       <p>No hay estudiantes inscritos en esta clase.</p>
     </div>
 
@@ -35,12 +40,13 @@
         </ion-item>
 
         <!-- Botones para marcar la asistencia -->
-        <ion-segment [value]="estudiante.estadoAsistencia" (ionChange)="marcarAsistencia(estudiante.id, $event.detail.value)">
+        <p *ngIf="!estudiante.estadoAsistencia">Selecciona un estado para corregir este registro.</p>
+        <ion-segment [value]="estudiante.estadoAsistencia ?? undefined" [disabled]="guardando" (ionChange)="marcarAsistencia(estudiante.id, $event.detail.value)">
           <ion-segment-button value="PRESENTE">
             <ion-label color="success">Presente</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="FALTA">
-            <ion-label color="danger">Falta</ion-label>
+          <ion-segment-button value="AUSENTE">
+            <ion-label color="danger">Ausente</ion-label>
           </ion-segment-button>
           <ion-segment-button value="TARDANZA">
             <ion-label color="warning">Tardanza</ion-label>
@@ -51,8 +57,8 @@
     
     <ion-footer class="ion-no-border" *ngIf="estudiantes.length > 0">
       <ion-toolbar>
-        <ion-button (click)="guardarLista()" expand="block" color="primary" class="ion-margin">
-          Guardar Asistencia
+        <ion-button (click)="guardarLista()" [disabled]="guardando || cargandoEstudiantes || cargandoAsignaciones" expand="block" color="primary" class="ion-margin">
+          {{ guardando ? 'Guardando…' : 'Guardar Asistencia' }}
           <ion-icon slot="end" name="save-outline"></ion-icon>
         </ion-button>
       </ion-toolbar>

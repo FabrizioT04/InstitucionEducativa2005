@@ -1,18 +1,42 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController, ActionSheetController, LoadingController, ToastController } from '@ionic/angular';
-import { Auth, onAuthStateChanged, signOut, User } from '@angular/fire/auth';
-import { Firestore, doc, getDoc, updateDoc } from '@angular/fire/firestore';
+import { Auth, signOut, User } from '@angular/fire/auth';
+import { Firestore, doc, updateDoc } from '@angular/fire/firestore';
+import { AccessRepository } from '../core/auth/access.repository';
+import { parseUserRole, UserRole } from '../core/auth/access.models';
 import { Storage, ref, uploadString, getDownloadURL } from '@angular/fire/storage';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { camera, logOutOutline, ribbonOutline, checkmarkDoneOutline } from 'ionicons/icons';
+import { bookOutline, camera, checkmarkDoneOutline, layersOutline, logOutOutline, peopleOutline, personCircleOutline, ribbonOutline, schoolOutline } from 'ionicons/icons';
+
+interface ProfileLink {
+  label: string;
+  path: string;
+  icon: string;
+}
+
+const PROFILE_LINKS: Record<UserRole, readonly ProfileLink[]> = {
+  administrador: [
+    { label: 'Gestionar usuarios', path: '/user-list', icon: peopleOutline },
+    { label: 'Gestionar cursos', path: '/manage-courses', icon: bookOutline },
+    { label: 'Gestionar grados', path: '/grade-management', icon: schoolOutline },
+    { label: 'Clases y asignaciones', path: '/tabs/tab2', icon: layersOutline },
+  ],
+  profesor: [
+    { label: 'Mis clases', path: '/tabs/tab2', icon: bookOutline },
+  ],
+  estudiante: [
+    { label: 'Mis Calificaciones', path: '/my-grades', icon: ribbonOutline },
+    { label: 'Historial de Asistencia', path: '/attendance-history', icon: checkmarkDoneOutline },
+  ],
+};
 
 // Interfaz para tipar los datos del usuario
 interface UserProfile {
   nombreCompleto: string;
   email: string;
-  rol: string;
+  rol: UserRole;
   photoURL?: string;
 }
 
@@ -23,14 +47,18 @@ interface UserProfile {
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, TitleCasePipe],
 })
-export class Tab3Page implements OnInit {
+export class Tab3Page implements OnInit, OnDestroy {
   public currentUser: User | null = null;
   public userProfile: UserProfile | null = null;
   public cargando = true;
+  readonly icons = { camera, logOutOutline, personCircleOutline };
+  private unsubscribeAuth?: () => void;
+  private loadVersion = 0;
 
   // Inyección de dependencias
   private auth = inject(Auth);
   private firestore = inject(Firestore);
+  private repository = inject(AccessRepository);
   private storage = inject(Storage);
   private navCtrl = inject(NavController);
   private actionSheetCtrl = inject(ActionSheetController);
@@ -40,7 +68,9 @@ export class Tab3Page implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    onAuthStateChanged(this.auth, (user) => {
+    this.unsubscribeAuth = this.auth.onAuthStateChanged((user) => {
+      this.loadVersion++;
+      this.userProfile = null;
       if (user) {
         this.currentUser = user;
         this.loadUserProfile(user.uid);
@@ -52,36 +82,45 @@ export class Tab3Page implements OnInit {
     });
   }
 
-  get icons() {
-    // 1. AÑADIMOS LOS NUEVOS ICONOS
-    return { camera, logOutOutline, ribbonOutline, checkmarkDoneOutline };
+  ngOnDestroy() {
+    this.loadVersion++;
+    this.unsubscribeAuth?.();
+  }
+
+  get accountLinks(): readonly ProfileLink[] {
+    return this.userProfile ? PROFILE_LINKS[this.userProfile.rol] : [];
   }
 
   async loadUserProfile(uid: string) {
+    const version = ++this.loadVersion;
     this.cargando = true;
+    this.userProfile = null;
     try {
-      const userDocRef = doc(this.firestore, `usuarios/${uid}`);
-      const docSnap = await getDoc(userDocRef);
-
-      if (docSnap.exists()) {
-        this.userProfile = docSnap.data() as UserProfile;
-      } else {
-        this.userProfile = null;
+      const profile = await this.repository.getProfile(uid);
+      if (version !== this.loadVersion || this.currentUser?.uid !== uid) return;
+      const role = parseUserRole(profile?.['rol']);
+      if (profile && role) {
+        this.userProfile = {
+          nombreCompleto: String(profile['nombreCompleto'] ?? ''),
+          email: String(profile['email'] ?? ''),
+          rol: role,
+          photoURL: typeof profile['photoURL'] === 'string' ? profile['photoURL'] : undefined,
+        };
       }
     } catch (error) {
       console.error("Error al cargar el perfil:", error);
-      this.userProfile = null;
+      if (version === this.loadVersion) this.userProfile = null;
     } finally {
-      this.cargando = false;
+      if (version === this.loadVersion) this.cargando = false;
     }
   }
 
   // 2. NUEVA FUNCIÓN PARA OBTENER EL COLOR DEL ROL
   getRoleColor(role: string): string {
-    switch (role.toLowerCase()) {
+    switch (parseUserRole(role)) {
       case 'administrador': return 'danger';
       case 'profesor': return 'secondary';
-      case 'alumno': return 'primary';
+      case 'estudiante': return 'primary';
       default: return 'medium';
     }
   }

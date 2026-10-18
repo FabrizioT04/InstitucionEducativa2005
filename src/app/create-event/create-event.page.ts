@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController, ToastController } from '@ionic/angular';
@@ -11,7 +11,7 @@ import { Firestore, collection, addDoc, Timestamp } from '@angular/fire/firestor
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
-export class CreateEventPage implements OnInit {
+export class CreateEventPage {
   evento = {
     titulo: '',
     descripcion: '',
@@ -20,14 +20,9 @@ export class CreateEventPage implements OnInit {
   };
   guardando = false;
 
-  constructor(
-    private firestore: Firestore,
-    private navController: NavController,
-    private toastController: ToastController
-  ) { }
-
-  ngOnInit() {
-  }
+  private readonly firestore = inject(Firestore);
+  private readonly navController = inject(NavController);
+  private readonly toastController = inject(ToastController);
 
   async guardarEvento() {
     if (!this.evento.titulo || !this.evento.fechaInicio || !this.evento.fechaFin) {

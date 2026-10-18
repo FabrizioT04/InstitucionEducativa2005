@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, NavController, ToastController } from '@ionic/angular';
@@ -18,12 +18,9 @@ export class CreateComunicadoPage {
   };
   guardando = false;
 
-  // Se inyectan los servicios en el constructor
-  constructor(
-    private firestore: Firestore,
-    private navController: NavController,
-    private toastController: ToastController
-  ) { }
+  private readonly firestore = inject(Firestore);
+  private readonly navController = inject(NavController);
+  private readonly toastController = inject(ToastController);
 
   async saveComunicado() {
     if (!this.comunicado.titulo || !this.comunicado.mensaje) {

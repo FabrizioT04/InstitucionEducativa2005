@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -58,7 +58,7 @@ interface Grade {
     FormsModule
   ]
 })
-export class CreateUserPage implements OnInit {
+export class CreateUserPage {
 
   // --- Propiedades ---
   usuario: {
@@ -91,9 +91,6 @@ export class CreateUserPage implements OnInit {
     // Cargar grados para el <ion-select>
     const gradosCollection = collection(this.firestore, 'grados');
     this.grados$ = collectionData(gradosCollection, { idField: 'id' }) as Observable<Grade[]>;
-  }
-
-  ngOnInit() {
   }
 
   // --- Función Principal: Crear Usuario ---

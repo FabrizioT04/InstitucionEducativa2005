@@ -7,11 +7,19 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --configuration production",
+    "build:web:staging": "node scripts/build-web.mjs staging",
+    "build:web:production": "node scripts/build-web.mjs production",
+    "test:deployment": "node --test scripts/build-web.test.mjs",
+    "test:hosting": "npx --yes firebase-tools@15.34.0 emulators:exec --only hosting --project demo-ie2005-staging \"node scripts/check-hosting.mjs\"",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:foundation": "ng test --ts-config=tsconfig.foundation.json --watch=false --browsers=ChromeHeadless --include=src/app/core/**/*.spec.ts --include=src/app/guards/**/*.spec.ts --include=src/app/shared/**/*.spec.ts --include=src/app/manage-grades/*.spec.ts --include=src/app/my-grades/*.spec.ts --include=src/app/course-detail/*.spec.ts --include=src/app/manage-attendance/*.spec.ts --include=src/app/tab2/*.spec.ts --include=src/app/tab3/*.spec.ts --include=src/app/app.routes.spec.ts",
     "lint": "ng lint"
   },
   "private": true,
+  "engines": {
+    "node": ">=22.12.0 <23"
+  },
   "dependencies": {
     "@angular/animations": "^20.0.0",
     "@angular/common": "^20.0.0",
